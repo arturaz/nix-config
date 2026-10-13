@@ -9,5 +9,11 @@
     # Allow DRM-protected video (Netflix etc.) without asking; Firefox downloads the
     # Widevine plugin on first use.
     policies.EncryptedMediaExtensions.Enabled = true;
+    # Firefox blocks videos with sound from starting on their own, which stops LRT
+    # (EPIKA) from playing the next episode.
+    policies.Permissions.Autoplay.Allow = [
+      "https://www.lrt.lt"
+      "https://lrt.lt"
+    ];
   };
 }
