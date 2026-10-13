@@ -52,6 +52,12 @@ Apart from those, `/etc/nixos` on the machines isn't used; don't keep a
 `configuration.nix` there, or a plain `nixos-rebuild` on the machine would roll it back
 to that.
 
+## Editor
+
+`.vscode/settings.json` sets up the Nix IDE extension (`jnoortheen.nix-ide`) with `nixd`
+(NixOS option completion, taken from this flake) and `nixfmt`. Install both into your
+Nix profile: `nix profile add nixpkgs#nixd nixpkgs#nixfmt`.
+
 ## Adding a machine
 
 1. Install NixOS on it as usual (this generates `/etc/nixos/hardware-configuration.nix`).

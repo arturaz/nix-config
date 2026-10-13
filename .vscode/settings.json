@@ -1,0 +1,42 @@
+{
+  // Nix IDE (jnoortheen.nix-ide) with nixd; nixd and nixfmt come from the Nix user
+  // profile (nix profile add nixpkgs#nixd nixpkgs#nixfmt).
+  "nix.enableLanguageServer": true,
+  "nix.serverPath": "nixd",
+  "nix.serverSettings": {
+    "nixd": {
+      "formatting": {
+        "command": ["nixfmt"]
+      },
+      // `path:` so new files are seen before they're committed (a git flake only sees
+      // files in git's index, and jj doesn't add them there).
+      "nixpkgs": {
+        "expr": "import (builtins.getFlake \"path:${workspaceFolder}\").inputs.nixpkgs { }"
+      },
+      "options": {
+        // All hosts share the same nixpkgs, so any host's options cover all of them.
+        "nixos": {
+          "expr": "(builtins.getFlake \"path:${workspaceFolder}\").nixosConfigurations.tv-box.options"
+        }
+      }
+    }
+  },
+  "cSpell.words": [
+    "alsa",
+    "arturas",
+    "Artūras",
+    "attrsets",
+    "networkmanager",
+    "nixd",
+    "nixfmt",
+    "nixos",
+    "nixpkgs",
+    "pipewire",
+    "pkgs",
+    "pulseaudio",
+    "rederive",
+    "rtkit",
+    "Šlajus",
+    "toplevel"
+  ]
+}
