@@ -37,6 +37,15 @@ let
         ]
       }
     '') dirs;
+
+  # Shown in the (empty) folders the links lead to whenever the HDD isn't mounted.
+  noteName = "USB HARD DRIVE IS NOT CONNECTED.txt";
+  note = pkgs.writeText "hdd-not-connected.txt" ''
+    The big USB hard drive isn't connected (or didn't mount), so this folder is empty.
+    Its files are on that drive. Check that it's plugged in and powered on.
+
+    Nothing can be saved here until it's back.
+  '';
 in
 {
   fileSystems.${mountPoint} = {
@@ -82,6 +91,45 @@ in
           dialog=$!
         fi
       done
+    '';
+  };
+
+  # Puts the note into /mnt/hdd and every linked folder's target on the SSD, underneath
+  # where the HDD gets mounted: hidden while it's mounted, the only thing there when it's
+  # not. They're root's and read-only, so nothing gets saved to the SSD by mistake.
+  # Works while the HDD is mounted too: it writes through a bind mount of just the root
+  # file system, in a mount namespace of its own.
+  systemd.services.hdd-missing-notes = {
+    description = "Put a 'drive not connected' note under ${mountPoint}";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      PrivateMounts = true;
+      RuntimeDirectory = "hdd-missing-notes";
+    };
+    path = [
+      pkgs.coreutils
+      pkgs.util-linux
+    ];
+    script = ''
+      root="$RUNTIME_DIRECTORY"
+      mount --bind / "$root"
+
+      put_note() {
+        install -d -m 0755 "$root$1"
+        install -m 0444 ${note} "$root$1/${noteName}"
+      }
+
+      put_note ${mountPoint}
+      ${lib.concatStrings (
+        lib.mapAttrsToList (
+          _: user:
+          lib.concatMapStrings (dir: ''
+            put_note ${lib.escapeShellArg "${mountPoint}/home/${user.name}/${dir}"}
+          '') dirs
+        ) users
+      )}
     '';
   };
 

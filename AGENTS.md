@@ -44,7 +44,9 @@ Hosts: `tv-box` (reached as `arturas@tv-box.lan`; Intel, systemd-boot/EFI). Its
 boot service moves every normal user's `~/{Downloads,Music,Pictures,Videos}` to
 `/mnt/hdd/home/<user>/` and symlinks them back; a udev rule remounts it when it's plugged
 back in, and `entertainment` gets a KDE dialog (`hdd-missing-warning` user service)
-while it's not mounted.
+while it's not mounted. `hdd-missing-notes` writes a read-only "USB HARD DRIVE IS NOT
+CONNECTED.txt" into the SSD directories underneath the mount point (through a bind mount of
+`/` in a private namespace), so the links show it when the HDD isn't mounted.
 
 ## Rules
 
