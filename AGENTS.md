@@ -51,7 +51,9 @@ not covered here. This file records what an agent would otherwise have to rederi
     Firefox web player per person was tried before; its windows' icons reverted to
     Firefox's).
   - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox as default browser,
-    with DRM on and autoplay allowed on lrt.lt), `audio.nix` (PipeWire), `printing.nix` (CUPS)
+    with DRM on and autoplay allowed on lrt.lt), `plasma-panels.nix` (`desktop.plasmaPanels = ./plasma;`:
+    each user's panel files from `hosts/<name>/plasma/<user>/`, copied into homes
+    missing them at boot; `deploy.sh` pulls them from the machine, which wins), `audio.nix` (PipeWire), `printing.nix` (CUPS)
   - `hardware/`: `intel-graphics.nix` (VA-API video decoding via intel-media-driver)
 - `deploy.sh`: remote deploy, doing `nixos-rebuild --build-host/--target-host --sudo`'s
   steps itself (eval, copy the .drv, build on target, `nix-env --set` +
@@ -77,8 +79,9 @@ at 100%.
 
 ## Rules
 
-- Never edit `hosts/*/hardware-configuration.nix`. It's copied from the machine's
-  `/etc/nixos` on every deploy (`MACHINE_FILES` in `deploy.sh`) and would be overwritten.
+- Never edit `hosts/*/hardware-configuration.nix` or `hosts/*/plasma/`. They're copied
+  from the machine on every deploy (`MACHINE_FILES` and `PLASMA_FILES` in `deploy.sh`)
+  and would be overwritten.
   Hardware tweaks go into the host's `configuration.nix` or a module.
 - Never change `system.stateVersion`.
 - Never set `nix.settings.trusted-users` (deliberate: it makes that user effectively

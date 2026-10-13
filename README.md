@@ -61,6 +61,19 @@ Apart from those, `/etc/nixos` on the machines isn't used; don't keep a
 `configuration.nix` there, or a plain `nixos-rebuild` on the machine would roll it back
 to that.
 
+## Plasma panel layouts
+
+Each user's panel layout (`~/.config/plasma-org.kde.plasma.desktop-appletsrc` and
+`plasmashellrc`, which also hold the desktop's widgets and wallpaper) is saved in
+`hosts/<name>/plasma/<user>/`. Like the machine-generated files, the machine is the
+source of truth: change panels there as usual, and `deploy.sh` copies every normal
+user's files back here (logging in as root to read them) and lists them for
+committing. A boot service (`modules/desktop/plasma-panels.nix`) copies them into a
+home only where they're missing, e.g. after a reinstall or for a fresh account, and
+never overwrites what's there. To restore a saved layout over a changed one, log out,
+delete the user's two files on the machine and reboot. For a new host, create
+`hosts/<name>/plasma/` and set `desktop.plasmaPanels = ./plasma;`.
+
 ## tv-box's HDD
 
 `hosts/tv-box/hardware/hdd.nix` mounts an ext4 disk at `/mnt/hdd` (skipped if it's

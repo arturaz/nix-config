@@ -67,6 +67,20 @@ on_exit() {
 }
 trap on_exit EXIT
 
+# Lists $1 for committing if it's new or different from the last commit (for jj:
+# changed in the working-copy commit).
+note_if_changed() {
+  local changed
+  if [[ -d .jj ]]; then
+    changed="$(jj diff --name-only -- "$1")"
+  else
+    changed="$(git status --porcelain -- "$1")"
+  fi
+  if [[ -n "$changed" ]]; then
+    uncommitted+=("$1")
+  fi
+}
+
 # ssh exits with 255 on connection/auth errors.
 if ! on_target true; then
   error "could not connect to $TARGET. Is it on and on the network? Try: ssh $TARGET"
@@ -81,16 +95,36 @@ for f in "${MACHINE_FILES[@]}"; do
     error "/etc/nixos/$f is missing on $TARGET." \
       "Generate it there first, e.g.: sudo nixos-generate-config"
   fi
-  # New or different from the last commit (for jj: changed in the working-copy commit).
-  if [[ -d .jj ]]; then
-    changed="$(jj diff --name-only -- "$dest")"
-  else
-    changed="$(git status --porcelain -- "$dest")"
-  fi
-  if [[ -n "$changed" ]]; then
-    uncommitted+=("$dest")
-  fi
+  note_if_changed "$dest"
 done
+
+# Each user's Plasma panel layout (see modules/desktop/plasma-panels.nix): the
+# machine's copy wins, so changes made there end up here. Read as root, since homes
+# aren't readable by others; arturas's key can log in as root (modules/networking.nix).
+# A user without the files there (never logged in) keeps what's here.
+# Only for hosts with a plasma/ directory (and desktop.plasmaPanels set).
+PLASMA_FILES=(plasma-org.kde.plasma.desktop-appletsrc plasmashellrc)
+if [[ -d "hosts/$NAME/plasma" ]]; then
+  as_root_target() {
+    ssh "${ssh_opts[@]}" "root@${TARGET#*@}" "$@"
+  }
+  # Normal users: NixOS gives them uids from 1000.
+  users="$(as_root_target "awk -F: '\$3 >= 1000 && \$3 < 30000 { print \$1 \":\" \$6 }' /etc/passwd")" ||
+    error "could not log into root@${TARGET#*@} to read the Plasma panel layouts."
+  while IFS=: read -r user home; do
+    for f in "${PLASMA_FILES[@]}"; do
+      dest="hosts/$NAME/plasma/$user/$f"
+      mkdir -p "${dest%/*}"
+      if as_root_target "cat $(printf %q "$home/.config/$f")" > "$dest.tmp" 2>/dev/null; then
+        mv "$dest.tmp" "$dest"
+        note_if_changed "$dest"
+      else
+        rm -f "$dest.tmp"
+      fi
+    done
+    rmdir "hosts/$NAME/plasma/$user" 2>/dev/null || true
+  done <<<"$users"
+fi
 
 # Activating needs root on the target: ask for the sudo password now and check it,
 # before spending time on the build.

@@ -10,6 +10,7 @@
     ../../modules/users/arturas.nix
     ../../modules/users/entertainment
     ../../modules/desktop/plasma.nix
+    ../../modules/desktop/plasma-panels.nix
     ../../modules/desktop/audio.nix
     ../../modules/desktop/printing.nix
     ../../modules/hardware/intel-graphics.nix
@@ -18,6 +19,9 @@
   ];
 
   networking.hostName = "tv-box";
+
+  # Panel layouts, copied from this machine by deploy.sh.
+  desktop.plasmaPanels = ./plasma;
 
   services.displayManager.autoLogin = {
     enable = true;
