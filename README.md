@@ -17,13 +17,16 @@ Current hosts:
 ## Deploying
 
 `./deploy.sh <name>` evaluates the configuration on this machine, then builds and
-activates it on `arturas@<name>.lan` (`nixos-rebuild switch --build-host/--target-host`),
-asking for the target's sudo password once. Pass `test`, `boot`, `dry-activate` or
-`build` as a second argument to use a different `nixos-rebuild` action, and set
+activates it on `arturas@<name>.lan`. Pass `test`, `boot`, `dry-activate` or `build` as a
+second argument to do that instead of `switch` (as in `nixos-rebuild`), and set
 `TARGET=user@host` if the machine isn't reachable at the default address.
 
-Needs Nix with flakes enabled on this machine (`experimental-features = nix-command
-flakes` in `~/.config/nix/nix.conf`).
+It asks for the target's sudo password once, at the start, and checks it right away (up
+to 3 tries), so a typo doesn't cost a build. It does the same steps as `nixos-rebuild
+--build-host/--target-host --sudo`, but itself, so that when one fails it says which, and
+whether the machine was changed (and how to roll back if it was).
+
+Needs Nix on this machine; the script enables flakes for its own commands.
 
 Building on the target is the default because nearly everything comes prebuilt from
 cache.nixos.org, and the target already has most of its system. `BUILD_LOCAL=1` builds

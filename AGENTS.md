@@ -39,8 +39,11 @@ not covered here. This file records what an agent would otherwise have to rederi
   - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox with DRM on and
     autoplay allowed on lrt.lt), `audio.nix` (PipeWire), `printing.nix` (CUPS)
   - `hardware/`: `intel-graphics.nix` (VA-API video decoding via intel-media-driver)
-- `deploy.sh`: remote deploy via `nixos-rebuild --target-host`. Usage and env vars
-  (`TARGET`, `UPDATE`, `BUILD_LOCAL`) are documented at its top and in the README.
+- `deploy.sh`: remote deploy, doing `nixos-rebuild --build-host/--target-host --sudo`'s
+  steps itself (eval, copy the .drv, build on target, `nix-env --set` +
+  `switch-to-configuration` via `systemd-run`) so it can check the sudo password before
+  building and explain each failure. Usage and env vars (`TARGET`, `UPDATE`,
+  `BUILD_LOCAL`) are documented at its top and in the README.
 - `.vscode/settings.json`: nixd + nixfmt. Its `options.nixos` expression hardcodes the
   `tv-box` host; update it if that host is ever removed or renamed. Add new
   domain words to `cSpell.words` there when they trip the spell checker.
