@@ -26,7 +26,12 @@ not covered here. This file records what an agent would otherwise have to rederi
   - `nix.nix` (flakes, `allowUnfree`, weekly GC of generations older than 30 days),
     `locale.nix` (Europe/Vilnius, en_US + lt_LT formats, `us` keyboard),
     `networking.nix` (NetworkManager, sshd, port 22, arturas's ssh key, which can log
-    into every user incl. root), `packages.nix` (system packages), `users/arturas.nix`
+    into every user incl. root), `packages.nix` (system packages),
+    `claude-code.nix` (a `claude` wrapper that, on a user's first run, installs the
+    official native Claude Code into their `~/.local` via `claude.ai/install.sh`; that
+    copy auto-updates itself and, with `localBinInPath`, shadows the wrapper; needs
+    `nix-ld`. nixpkgs' `claude-code` is avoided because it can't self-update),
+    `users/arturas.nix`
     (admin user, wheel),
     `users/entertainment/` (`default.nix`: non-admin account, empty password, tv-box
     auto-logs into it; `ktorrent.nix`: KTorrent + its firewall ports; `moonlight.nix`:

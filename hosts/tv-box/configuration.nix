@@ -6,6 +6,7 @@
     ../../modules/locale.nix
     ../../modules/networking.nix
     ../../modules/packages.nix
+    ../../modules/claude-code.nix
     ../../modules/users/arturas.nix
     ../../modules/users/entertainment
     ../../modules/desktop/plasma.nix
