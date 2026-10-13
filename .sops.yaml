@@ -1,0 +1,15 @@
+# Who can decrypt the sops files in secrets/ (used by sops-nix; see "Secrets" in
+# README.md). No secrets yet: this is set up for the future. After changing the keys,
+# run `sops updatekeys secrets/*.yaml`.
+keys:
+  # arturas's ~/.ssh/id_ed25519, which sops reads directly (asking for its passphrase).
+  - &arturas ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIm/5r39Ldi7+51YW4tBME+mOztxnlN1d+/jauhxP20W
+  # Hosts: /etc/ssh/ssh_host_ed25519_key as an age key, which is what sops-nix decrypts
+  # with. Get it with `ssh-keyscan -t ed25519 <host>.lan | nix run nixpkgs#ssh-to-age`.
+  - &tv-box age1ksa4ewrqqkyaylvqvtagn9trkznepascuv7l6h3zya7xc9m95umqkwjtk2
+creation_rules:
+  - path_regex: ^secrets/[^/]+\.yaml$
+    key_groups:
+      - age:
+          - *arturas
+          - *tv-box

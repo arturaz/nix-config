@@ -71,6 +71,31 @@ it): `sudo mkfs.ext4 -L hdd /dev/sdX1`, put its UUID (`lsblk -o NAME,UUID`) into
 file's `uuid` and the disk's `/dev/disk/by-id/ata-...` link into `disk`, deploy, then
 reboot.
 
+## Secrets
+
+There are no secrets yet; [sops-nix](https://github.com/Mic92/sops-nix) is set up for
+when one is needed. Secrets live encrypted in `secrets/*.yaml` (safe to commit; anyone
+with read access to the repo sees only ciphertext and the key names). `.sops.yaml` lists
+who can decrypt them: your `~/.ssh/id_ed25519` and each machine's SSH host key, so a
+machine decrypts its secrets itself at activation, into `/run/secrets/` (never into the
+world-readable Nix store).
+
+Adding the first one:
+
+1. `nix shell nixpkgs#sops -c sops secrets/common.yaml` opens an editor; add
+   `wifi-password: hunter2` and save. sops asks for your SSH key's passphrase whenever
+   it decrypts.
+2. In a module:
+
+   ```nix
+   sops.defaultSopsFile = ../secrets/common.yaml;
+   sops.secrets.wifi-password = { };   # /run/secrets/wifi-password, root-only
+   ```
+
+   Point the service at the file path (`config.sops.secrets.wifi-password.path`); for a
+   secret inside a config file, see `sops.templates`. Set `owner`/`mode`/`restartUnits`
+   on the secret as needed.
+
 ## Editor
 
 `.vscode/settings.json` sets up the Nix IDE extension (`jnoortheen.nix-ide`) with `nixd`
@@ -87,3 +112,5 @@ Nix profile: `nix profile add nixpkgs#nixd nixpkgs#nixfmt`.
    adds it.
 3. Remove `/etc/nixos/configuration.nix` on the machine.
 4. `./deploy.sh <name>`, then commit `hosts/<name>/hardware-configuration.nix`.
+5. If it needs secrets: add its key to `.sops.yaml` (the command is in there), then
+   `nix shell nixpkgs#sops -c sops updatekeys secrets/*.yaml`.

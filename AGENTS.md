@@ -8,7 +8,12 @@ not covered here. This file records what an agent would otherwise have to rederi
 
 - `flake.nix`: `nixosConfigurations.<name>` for every directory in `hosts/`
   (auto-discovered, nothing to register). Each gets `hosts/<name>/configuration.nix` +
-  `hosts/<name>/hardware-configuration.nix`. Single input: `nixpkgs` on `nixos-26.05`.
+  `hosts/<name>/hardware-configuration.nix` + the sops-nix module. Inputs: `nixpkgs` on
+  `nixos-26.05`, `sops-nix` (following our nixpkgs).
+- `.sops.yaml` + `secrets/*.yaml` (none yet): sops-nix secrets, decryptable by arturas's
+  SSH key and each host's SSH host key; see "Secrets" in the README. Never put a
+  plaintext secret in a `.nix` file: the repo will be shared read-only with friends,
+  and the Nix store is world-readable.
 - `hosts/<name>/configuration.nix`: imports from `modules/` and `./hardware/`, plus
   only host-specific settings (hostname, boot loader, `system.stateVersion`).
 - `hosts/<name>/hardware/`: hardware only that machine has (e.g. a particular disk),
