@@ -46,7 +46,8 @@ boot service moves every normal user's `~/{Downloads,Music,Pictures,Videos}` to
 back in, and `entertainment` gets a KDE dialog (`hdd-missing-warning` user service)
 while it's not mounted. `hdd-missing-notes` writes a read-only "USB HARD DRIVE IS NOT
 CONNECTED.txt" into the SSD directories underneath the mount point (through a bind mount of
-`/` in a private namespace), so the links show it when the HDD isn't mounted.
+`/` in a private namespace), so the links show it when the HDD isn't mounted. `hdd-idle` (hd-idle, started with the
+mount) spins it down after 20 minutes without I/O.
 
 ## Rules
 

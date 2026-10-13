@@ -1,6 +1,6 @@
 # The 2 TB USB HDD (ext4) mounted at /mnt/hdd, with every normal user's
 # large home folders (Videos, Downloads, ...) moved onto it and symlinked back, and a
-# warning for the entertainment account while it's missing.
+# warning for the entertainment account while it's missing. Spins down when idle.
 {
   config,
   lib,
@@ -14,6 +14,8 @@ let
   # By UUID (`lsblk -o NAME,UUID`), so another disk can't be mounted here by mistake.
   # Changes if the disk is reformatted.
   uuid = "09f4888d-2069-4ff9-916a-bd96775ba202";
+  # The whole disk (the UUID above is its partition), by model and serial number.
+  disk = "/dev/disk/by-id/ata-HGST_HUS722T2TALA604_WMC6N0J4ZZZR";
 
   # Home folders that get big. Each becomes ~/<dir> -> /mnt/hdd/home/<user>/<dir>.
   dirs = [
@@ -64,6 +66,21 @@ in
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_UUID}=="${uuid}", ENV{SYSTEMD_WANTS}+="${utils.escapeSystemdPath mountPoint}.mount"
   '';
+
+  # Spin down after 20 minutes without reads or writes; the next access spins it back up
+  # (taking a few seconds). hd-idle rather than the drive's own timer (`hdparm -S`),
+  # which USB bridges often don't pass on or keep. Started with the mount, so after a
+  # replug it finds the disk again even under a new /dev/sdX name.
+  systemd.services.hdd-idle = {
+    description = "Spin down the HDD at ${mountPoint} when idle";
+    wantedBy = [ "${utils.escapeSystemdPath mountPoint}.mount" ];
+    bindsTo = [ "${utils.escapeSystemdPath mountPoint}.mount" ];
+    after = [ "${utils.escapeSystemdPath mountPoint}.mount" ];
+    # `-i 0` leaves other disks alone; `-c ata` sends ATA STANDBY, which this enclosure's
+    # bridge (JMicron JMS578) passes through.
+    serviceConfig.ExecStart = "${lib.getExe pkgs.hd-idle} -i 0 -c ata -a ${disk} -i 1200";
+    serviceConfig.Restart = "on-failure";
+  };
 
   # While the HDD isn't mounted, the entertainment account gets a dialog saying so (once
   # per unplug, closed again when it's back). Rechecks on every mount/unmount.

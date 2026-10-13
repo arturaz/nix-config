@@ -61,9 +61,11 @@ unplugged) and, on every boot, moves each user's Downloads, Music, Pictures and 
 onto it, leaving symlinks in their place. It's mounted again when it's plugged back in,
 and the `entertainment` account shows a warning dialog while it's missing. Underneath the
 mount point (on the SSD), each linked folder holds only a read-only "USB HARD DRIVE IS
-NOT CONNECTED.txt", which is what the links show if it isn't mounted. To set up a new
-disk (this wipes it): `sudo mkfs.ext4 -L hdd /dev/sdX1`, put its UUID (`lsblk -o
-NAME,UUID`) into that file's `uuid`, deploy, then reboot.
+NOT CONNECTED.txt", which is what the links show if it isn't mounted. It spins down
+after 20 minutes without reads or writes (`hd-idle`). To set up a new disk (this wipes
+it): `sudo mkfs.ext4 -L hdd /dev/sdX1`, put its UUID (`lsblk -o NAME,UUID`) into that
+file's `uuid` and the disk's `/dev/disk/by-id/ata-...` link into `disk`, deploy, then
+reboot.
 
 ## Editor
 
