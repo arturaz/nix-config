@@ -42,6 +42,12 @@ Hosts: `tv-box` (reached as `arturas@tv-box.lan`; Intel, systemd-boot/EFI).
   hardware files).
 - Version control is jj (colocated with git). Prefer `jj` commands; `deploy.sh` handles
   both.
+- Put every change the user asks for in its own jj change: before editing any file,
+  run `jj new -m "<what this request does>"` so the work lands on top of the current
+  change instead of being mixed into it (if `@` is already empty and undescribed, just
+  `jj describe -m` it). One request, one change; follow-up fixes to
+  the same request stay in that change. Don't describe, squash or rewrite existing
+  changes unless asked.
 - Deploying touches a real machine and asks for a sudo password interactively; don't run
   `./deploy.sh` unless the user asks. Keep `README.md` in sync when changing how things
   work.
