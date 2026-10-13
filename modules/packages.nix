@@ -9,5 +9,8 @@
     vlc
     # Fallback for sites that only work in Chrome.
     google-chrome
+    # Password manager: desktop app and `bw` CLI.
+    bitwarden-desktop
+    bitwarden-cli
   ];
 }

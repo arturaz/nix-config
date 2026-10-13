@@ -26,6 +26,7 @@
     "arturas",
     "Artūras",
     "attrsets",
+    "bitwarden",
     "networkmanager",
     "nixd",
     "nixfmt",
@@ -36,8 +37,8 @@
     "pulseaudio",
     "rederive",
     "rtkit",
-    "sops",
     "Šlajus",
+    "sops",
     "toplevel"
   ]
 }
