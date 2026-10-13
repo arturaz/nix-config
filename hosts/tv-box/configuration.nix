@@ -12,13 +12,10 @@
     ../../modules/desktop/audio.nix
     ../../modules/desktop/printing.nix
     ../../modules/hardware/intel-graphics.nix
-    ../../modules/hardware/hdd.nix
+    ./hardware/hdd.nix
   ];
 
   networking.hostName = "tv-box";
-
-  # The 2 TB USB HDD (see ../../modules/hardware/hdd.nix).
-  fileSystems."/mnt/hdd".device = "/dev/disk/by-uuid/09f4888d-2069-4ff9-916a-bd96775ba202";
 
   services.displayManager.autoLogin = {
     enable = true;

@@ -7,6 +7,8 @@ directory in `hosts/` automatically.
   `desktop/audio.nix`, ...). Add new things here, as a new file when it's a new topic.
 - `hosts/<name>/configuration.nix`: imports the modules a machine uses, plus what's
   specific to it (hostname, boot loader, `system.stateVersion`).
+- `hosts/<name>/hardware/`: hardware only that machine has (e.g. a particular disk).
+  Hardware settings several machines could share go in `modules/hardware/`.
 
 Current hosts:
 
@@ -52,13 +54,13 @@ Apart from those, `/etc/nixos` on the machines isn't used; don't keep a
 `configuration.nix` there, or a plain `nixos-rebuild` on the machine would roll it back
 to that.
 
-## HDD storage
+## tv-box's HDD
 
-`modules/hardware/hdd.nix` mounts an ext4 disk at `/mnt/hdd` (skipped if it's
+`hosts/tv-box/hardware/hdd.nix` mounts an ext4 disk at `/mnt/hdd` (skipped if it's
 unplugged) and, on every boot, moves each user's Downloads, Music, Pictures and Videos
 onto it, leaving symlinks in their place. To set up a new disk (this wipes it): `sudo
-mkfs.ext4 -L hdd /dev/sdX1`, put its UUID (`lsblk -o NAME,UUID`) into the host's
-`fileSystems."/mnt/hdd".device`, deploy, then reboot.
+mkfs.ext4 -L hdd /dev/sdX1`, put its UUID (`lsblk -o NAME,UUID`) into
+that file's `device`, deploy, then reboot.
 
 ## Editor
 

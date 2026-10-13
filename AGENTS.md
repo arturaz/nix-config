@@ -9,8 +9,11 @@ not covered here. This file records what an agent would otherwise have to rederi
 - `flake.nix`: `nixosConfigurations.<name>` for every directory in `hosts/`
   (auto-discovered, nothing to register). Each gets `hosts/<name>/configuration.nix` +
   `hosts/<name>/hardware-configuration.nix`. Single input: `nixpkgs` on `nixos-26.05`.
-- `hosts/<name>/configuration.nix`: imports from `modules/` plus only host-specific
-  settings (hostname, boot loader, `system.stateVersion`).
+- `hosts/<name>/configuration.nix`: imports from `modules/` and `./hardware/`, plus
+  only host-specific settings (hostname, boot loader, `system.stateVersion`).
+- `hosts/<name>/hardware/`: hardware only that machine has (e.g. a particular disk),
+  one topic per file. Hardware settings several machines could share (e.g. a GPU
+  driver) go in `modules/hardware/`.
 - `modules/`: shared settings, one topic per file, each starting with a one-line comment
   saying what it covers. New settings go into a module (a new file for a new topic), not
   into a host file, unless they are truly machine-specific. Modules are plain attrsets;
@@ -29,18 +32,17 @@ not covered here. This file records what an agent would otherwise have to rederi
     fixed to `spotify`.
   - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox with DRM on and
     autoplay allowed on lrt.lt), `audio.nix` (PipeWire), `printing.nix` (CUPS)
-  - `hardware/`: `intel-graphics.nix` (VA-API video decoding via intel-media-driver),
-    `hdd.nix` (USB HDD, ext4, mounted `nofail` at `/mnt/hdd`; the host sets its
-    device by UUID; a boot service moves every normal user's
-    `~/{Downloads,Music,Pictures,Videos}` to `/mnt/hdd/home/<user>/` and symlinks them
-    back)
+  - `hardware/`: `intel-graphics.nix` (VA-API video decoding via intel-media-driver)
 - `deploy.sh`: remote deploy via `nixos-rebuild --target-host`. Usage and env vars
   (`TARGET`, `UPDATE`, `BUILD_LOCAL`) are documented at its top and in the README.
 - `.vscode/settings.json`: nixd + nixfmt. Its `options.nixos` expression hardcodes the
   `tv-box` host; update it if that host is ever removed or renamed. Add new
   domain words to `cSpell.words` there when they trip the spell checker.
 
-Hosts: `tv-box` (reached as `arturas@tv-box.lan`; Intel, systemd-boot/EFI).
+Hosts: `tv-box` (reached as `arturas@tv-box.lan`; Intel, systemd-boot/EFI). Its
+`hardware/hdd.nix`: the 2 TB USB HDD, ext4 by UUID, mounted `nofail` at `/mnt/hdd`; a
+boot service moves every normal user's `~/{Downloads,Music,Pictures,Videos}` to
+`/mnt/hdd/home/<user>/` and symlinks them back.
 
 ## Rules
 

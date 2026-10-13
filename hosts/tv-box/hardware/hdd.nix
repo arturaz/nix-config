@@ -1,4 +1,4 @@
-# A big, slow ext4 HDD mounted at /mnt/hdd, with every normal user's
+# The 2 TB USB HDD (ext4) mounted at /mnt/hdd, with every normal user's
 # large home folders (Videos, Downloads, ...) moved onto it and symlinked back.
 {
   config,
@@ -34,8 +34,10 @@ let
     '') dirs;
 in
 {
-  # The host sets `fileSystems."/mnt/hdd".device`, by UUID (`lsblk -o NAME,UUID`).
   fileSystems.${mountPoint} = {
+    # By UUID (`lsblk -o NAME,UUID`), so another disk can't be mounted here by mistake.
+    # Changes if the disk is reformatted.
+    device = "/dev/disk/by-uuid/09f4888d-2069-4ff9-916a-bd96775ba202";
     fsType = "ext4";
     # It's on USB: if it's unplugged, boot without it instead of dropping to an
     # emergency shell, and don't wait the default 90 s for it to appear.
