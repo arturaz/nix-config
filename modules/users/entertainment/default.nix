@@ -3,6 +3,7 @@
 {
   imports = [
     ./ktorrent.nix
+    ./moonlight.nix
     ./spotify.nix
   ];
 

@@ -20,8 +20,9 @@ not covered here. This file records what an agent would otherwise have to rederi
     arturas's ssh key, which can log into every user incl. root), `packages.nix`
     (system packages), `users/arturas.nix` (admin user, wheel),
     `users/entertainment/` (`default.nix`: non-admin account, empty password, tv-box
-    auto-logs into it; `ktorrent.nix`: KTorrent + its firewall ports; `spotify.nix`:
-    one auto-started Spotify web player per person, each a Firefox profile with its own
+    auto-logs into it; `ktorrent.nix`: KTorrent + its firewall ports; `moonlight.nix`:
+    Moonlight game streaming client, streaming from `razor` (Sunshine, not managed by
+    this repo); `spotify.nix`: one auto-started Spotify web player per person, each a Firefox profile with its own
     Wayland app id, via systemd user services, `~/bin/spotify-<name>` and app menu
     entries with hue-shifted icons from `spotify.png`). The native Spotify client
     was tried and dropped: copies in one D-Bus session quit, and its Wayland app id is
