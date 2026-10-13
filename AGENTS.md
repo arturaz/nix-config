@@ -19,8 +19,9 @@ not covered here. This file records what an agent would otherwise have to rederi
     formats, `us` keyboard), `networking.nix` (NetworkManager, sshd, port 22,
     arturas's ssh key, which can log into every user incl. root), `packages.nix`
     (system packages), `users/arturas.nix` (admin user, wheel),
-    `users/entertainment.nix` (non-admin, empty password, KTorrent + its firewall ports;
-    tv-box auto-logs into it)
+    `users/entertainment.nix` (non-admin, empty password, KTorrent + its firewall ports,
+    one auto-started Spotify per person via systemd user services, each with its own
+    HOME; tv-box auto-logs into it)
   - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox with DRM on and
     autoplay allowed on lrt.lt), `audio.nix` (PipeWire), `printing.nix` (CUPS)
   - `hardware/`: `intel-graphics.nix` (VA-API video decoding via intel-media-driver)
