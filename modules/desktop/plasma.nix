@@ -1,4 +1,5 @@
-# KDE Plasma 6 desktop on Wayland, with SDDM as the login screen, and Firefox.
+# KDE Plasma 6 desktop on Wayland, with SDDM as the login screen, and Firefox as the
+# default browser.
 {
   services.xserver.enable = false;
   services.displayManager.sddm.enable = true;
@@ -20,5 +21,15 @@
       "https://www.lrt.lt"
       "https://epika.lrt.lt"
     ];
+  };
+
+  # Default browser for everyone (/etc/xdg/mimeapps.list); a user's own choice in
+  # ~/.config/mimeapps.list still wins. Without it apps that don't ask Plasma may pick
+  # Google Chrome (packages.nix).
+  xdg.mime.defaultApplications = {
+    "text/html" = "firefox.desktop";
+    "application/xhtml+xml" = "firefox.desktop";
+    "x-scheme-handler/http" = "firefox.desktop";
+    "x-scheme-handler/https" = "firefox.desktop";
   };
 }

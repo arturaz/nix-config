@@ -1,4 +1,4 @@
-# One auto-started Spotify web player per person for the entertainment account, with
+# One auto-started native Spotify per person for the entertainment account, with
 # ~/bin/spotify-<name> launchers and app menu entries.
 {
   config,
@@ -10,7 +10,7 @@
 let
   home = config.users.users."entertainment".home;
 
-  # One Spotify web player per person, each logged into their own account. `hue` tints
+  # One Spotify instance per person, each logged into their own account. `hue` tints
   # the app menu icon (ImageMagick -modulate: 100 keeps Spotify green, 200 is +180°).
   spotifyProfiles = {
     arturas = {
@@ -27,35 +27,78 @@ let
     };
   };
 
-  # Runs open.spotify.com in its own Firefox profile, so each person stays logged in.
-  # The native client can't do this: copies in one session make each other quit, and on
-  # Wayland all their windows look the same. --name sets the Wayland app id, which
-  # Plasma matches to the menu entry for the window's name and icon. Firefox keeps
-  # DRM (needed by Spotify) on via its policies in desktop/plasma.nix.
+  # Opens links (e.g. the login page) from inside an instance's private environment
+  # with the real HOME and session bus, so they land in the normal Firefox.
+  xdgOpen = pkgs.writeShellScriptBin "xdg-open" ''
+    export HOME="$SPOTIFY_REAL_HOME" DBUS_SESSION_BUS_ADDRESS="$SPOTIFY_REAL_BUS"
+    unset XDG_CONFIG_HOME XDG_CACHE_HOME XDG_DATA_HOME
+    exec ${pkgs.xdg-utils}/bin/xdg-open "$@"
+  '';
+
+  # Spotify opens links via GTK, which looks up the browser in the instance's HOME;
+  # this makes it use the xdg-open above for web links (instead of whatever browser
+  # it finds first, started with the instance's HOME as a fresh profile).
+  openUrlDesktopItem = pkgs.makeDesktopItem {
+    name = "spotify-open-url";
+    desktopName = "Open in the default browser";
+    exec = "${lib.getExe xdgOpen} %u";
+    noDisplay = true;
+    mimeTypes = [
+      "text/html"
+      "x-scheme-handler/http"
+      "x-scheme-handler/https"
+    ];
+  };
+  instanceMimeapps = pkgs.writeText "mimeapps.list" ''
+    [Default Applications]
+    text/html=spotify-open-url.desktop
+    x-scheme-handler/http=spotify-open-url.desktop
+    x-scheme-handler/https=spotify-open-url.desktop
+  '';
+
+  # The private session bus for each instance. Unlike the stock session config it can't
+  # start services on demand: those would run with the instance's HOME, e.g. a KDE
+  # wallet daemon asking to create a new wallet for each instance.
+  privateBusConfig = pkgs.writeText "spotify-session-bus.conf" ''
+    <!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-Bus Bus Configuration 1.0//EN"
+      "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+    <busconfig>
+      <type>session</type>
+      <listen>unix:tmpdir=/tmp</listen>
+      <auth>EXTERNAL</auth>
+      <policy context="default">
+        <allow send_destination="*" eavesdrop="true"/>
+        <allow eavesdrop="true"/>
+        <allow own="*"/>
+      </policy>
+    </busconfig>
+  '';
+
+  # Spotify has no multi-account support and allows one instance per config/cache
+  # directory, so each instance gets its own HOME (Spotify keeps its data in
+  # ~/.config/spotify and ~/.cache/spotify). Copies sharing a D-Bus session make each
+  # other quit, so each also gets a private session bus; the cost is that Plasma's
+  # media controls and media keys don't see them.
   spotifyLauncher =
     name:
     pkgs.writeShellScriptBin "spotify-${name}" ''
-      profile="$HOME/.local/share/spotify-profiles/${name}"
-      # Already running: do nothing, a second window would be a second player.
-      if ${pkgs.procps}/bin/pgrep -u "$(id -u)" -f -- "--profile $profile" >/dev/null; then
-        exit 0
-      fi
-      mkdir -p "$profile"
-      # Skip first-run pages and the default browser prompt; don't reopen tabs after a
-      # crash (the URL below already opens the player).
-      cat > "$profile/user.js" <<'PREFS'
-      user_pref("browser.aboutwelcome.enabled", false);
-      user_pref("browser.shell.checkDefaultBrowser", false);
-      user_pref("browser.startup.homepage_override.mstone", "ignore");
-      user_pref("browser.sessionstore.resume_from_crash", false);
-      user_pref("datareporting.policy.dataSubmissionPolicyBypassNotification", true);
-      PREFS
-      exec ${lib.getExe config.programs.firefox.package} --profile "$profile" \
-        --name spotify-${name} --new-window https://open.spotify.com "$@"
+      export SPOTIFY_REAL_HOME="$HOME" SPOTIFY_REAL_BUS="$DBUS_SESSION_BUS_ADDRESS"
+      export HOME="$HOME/.local/share/spotify-homes/${name}"
+      export XDG_CONFIG_HOME="$HOME/.config" XDG_CACHE_HOME="$HOME/.cache"
+      export XDG_DATA_HOME="$HOME/.local/share"
+      export PATH="${xdgOpen}/bin:$PATH"
+      mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME/applications"
+      ln -sfn ${instanceMimeapps} "$XDG_CONFIG_HOME/mimeapps.list"
+      ln -sfn ${openUrlDesktopItem}/share/applications/spotify-open-url.desktop \
+        "$XDG_DATA_HOME/applications/"
+      # Already running: do nothing, a second copy would be a second player.
+      # --password-store=basic: Chromium's own storage, no keyring (wallet) lookups.
+      exec ${pkgs.util-linux}/bin/flock -n -E 0 "$HOME/.lock" \
+        ${pkgs.dbus}/bin/dbus-run-session --config-file=${privateBusConfig} -- \
+        ${lib.getExe pkgs.spotify} --password-store=basic "$@"
     '';
 
-  # The launcher plus an app menu entry with its own name and tinted icon (the Spotify
-  # logo in spotify.png, taken from the native client).
+  # The launcher plus an app menu entry with its own name and tinted icon.
   spotifyProfile =
     name:
     { displayName, hue }:
@@ -66,8 +109,7 @@ let
         desktopName = "Spotify (${displayName})";
         genericName = "Music Player";
         icon = "spotify-${name}";
-        startupWMClass = "spotify-${name}";
-        exec = lib.getExe launcher;
+        exec = "${lib.getExe launcher} %U";
         categories = [
           "Audio"
           "Music"
@@ -85,7 +127,7 @@ let
         mkdir -p $out/bin $out/share/applications $out/share/icons/hicolor/256x256/apps
         ln -s ${lib.getExe launcher} $out/bin/
         ln -s ${desktopItem}/share/applications/* $out/share/applications/
-        magick ${./spotify.png} \
+        magick ${pkgs.spotify}/share/spotify/icons/spotify-linux-256.png \
           -modulate 100,100,${toString hue} \
           $out/share/icons/hicolor/256x256/apps/spotify-${name}.png
       '';
@@ -114,6 +156,11 @@ in
       partOf = [ "graphical-session.target" ];
       after = [ "graphical-session.target" ];
       unitConfig.ConditionUser = "entertainment";
+      # So links (and the browser login) can open: xdg-open, Firefox, etc.
+      path = [
+        "/etc/profiles/per-user/entertainment"
+        "/run/current-system/sw"
+      ];
       serviceConfig.ExecStart = lib.getExe package;
       serviceConfig.Restart = "on-failure";
     }

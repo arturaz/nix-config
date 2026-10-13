@@ -39,13 +39,19 @@ not covered here. This file records what an agent would otherwise have to rederi
     `users/entertainment/` (`default.nix`: non-admin account, empty password, tv-box
     auto-logs into it, Plasma's stock "Gamepad" avatar; `ktorrent.nix`: KTorrent + its firewall ports; `moonlight.nix`:
     Moonlight game streaming client, streaming from `razor` (Sunshine, not managed by
-    this repo); `spotify.nix`: one auto-started Spotify web player per person, each a Firefox profile with its own
-    Wayland app id, via systemd user services, `~/bin/spotify-<name>` and app menu
-    entries with hue-shifted icons from `spotify.png`). The native Spotify client
-    was tried and dropped: copies in one D-Bus session quit, and its Wayland app id is
-    fixed to `spotify`.
-  - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox with DRM on and
-    autoplay allowed on lrt.lt), `audio.nix` (PipeWire), `printing.nix` (CUPS)
+    this repo); `spotify.nix`: one auto-started native Spotify per person via systemd user
+    services, each with its own HOME (`~/.local/share/spotify-homes/<name>`) and a
+    private D-Bus session from `dbus-run-session`, since copies in one session make
+    each other quit (its config can't start services, else e.g. a KDE wallet daemon
+    starts per instance and asks to create a wallet); an `xdg-open` wrapper restores the real HOME and bus so login links
+    open in the normal Firefox (Spotify opens links via GTK, so each instance's
+    `mimeapps.list` points web links at a desktop entry running that wrapper). Plus `~/bin/spotify-<name>` and app menu entries with
+    hue-shifted icons. Known costs: Plasma's media controls/keys don't see them, and the
+    windows all have Wayland app id `spotify`, so they look alike in the task bar. A
+    Firefox web player per person was tried before; its windows' icons reverted to
+    Firefox's).
+  - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox as default browser,
+    with DRM on and autoplay allowed on lrt.lt), `audio.nix` (PipeWire), `printing.nix` (CUPS)
   - `hardware/`: `intel-graphics.nix` (VA-API video decoding via intel-media-driver)
 - `deploy.sh`: remote deploy, doing `nixos-rebuild --build-host/--target-host --sudo`'s
   steps itself (eval, copy the .drv, build on target, `nix-env --set` +
