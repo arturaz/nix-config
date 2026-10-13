@@ -3,6 +3,7 @@
 {
   imports = [
     ../../modules/nix.nix
+    ../../modules/zram.nix
     ../../modules/locale.nix
     ../../modules/networking.nix
     ../../modules/packages.nix

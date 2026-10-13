@@ -67,7 +67,8 @@ Each user's panel layout (`~/.config/plasma-org.kde.plasma.desktop-appletsrc` an
 `plasmashellrc`, which also hold the desktop's widgets and wallpaper) is saved in
 `hosts/<name>/plasma/<user>/`. Like the machine-generated files, the machine is the
 source of truth: change panels there as usual, and `deploy.sh` copies every normal
-user's files back here (logging in as root to read them) and lists them for
+user's files back here (reading them with sudo, so even a `build` asks for the sudo
+password on such hosts) and lists them for
 committing. A boot service (`modules/desktop/plasma-panels.nix`) copies them into a
 home only where they're missing, e.g. after a reinstall or for a fresh account, and
 never overwrites what's there. To restore a saved layout over a changed one, log out,
@@ -77,7 +78,7 @@ delete the user's two files on the machine and reboot. For a new host, create
 ## tv-box's HDD
 
 `hosts/tv-box/hardware/hdd.nix` mounts an ext4 disk at `/mnt/hdd` (skipped if it's
-unplugged) and, on every boot, moves each user's Downloads, Music, Pictures and Videos
+unplugged) and, on every boot and whenever it gets mounted, moves each user's Downloads, Music, Pictures and Videos
 onto it, leaving symlinks in their place. It's mounted again when it's plugged back in,
 and the `entertainment` account shows a warning dialog while it's missing. Underneath the
 mount point (on the SSD), each linked folder holds only a read-only "USB HARD DRIVE IS

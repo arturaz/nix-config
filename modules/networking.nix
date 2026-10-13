@@ -2,11 +2,12 @@
 {
   networking.networkmanager.enable = true;
 
+  # Listens on port 22, which it opens in the firewall itself (openFirewall).
   services.openssh.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  # No ssh logins as root at all; log in as a user and use sudo.
+  services.openssh.settings.PermitRootLogin = "no";
 
-  # Keys in this file can log in as any user, root included (with a key only, never a
-  # password: PermitRootLogin defaults to prohibit-password). Per-user keys still go in
+  # Keys in this file can log in as any user except root. Per-user keys still go in
   # users.users.<name>.openssh.authorizedKeys.
   services.openssh.authorizedKeysFiles = [ "/etc/ssh/authorized_keys_all_users" ];
   environment.etc."ssh/authorized_keys_all_users" = {

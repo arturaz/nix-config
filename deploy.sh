@@ -98,39 +98,11 @@ for f in "${MACHINE_FILES[@]}"; do
   note_if_changed "$dest"
 done
 
-# Each user's Plasma panel layout (see modules/desktop/plasma-panels.nix): the
-# machine's copy wins, so changes made there end up here. Read as root, since homes
-# aren't readable by others; arturas's key can log in as root (modules/networking.nix).
-# A user without the files there (never logged in) keeps what's here.
-# Only for hosts with a plasma/ directory (and desktop.plasmaPanels set).
-PLASMA_FILES=(plasma-org.kde.plasma.desktop-appletsrc plasmashellrc)
-if [[ -d "hosts/$NAME/plasma" ]]; then
-  as_root_target() {
-    ssh "${ssh_opts[@]}" "root@${TARGET#*@}" "$@"
-  }
-  # Normal users: NixOS gives them uids from 1000.
-  users="$(as_root_target "awk -F: '\$3 >= 1000 && \$3 < 30000 { print \$1 \":\" \$6 }' /etc/passwd")" ||
-    error "could not log into root@${TARGET#*@} to read the Plasma panel layouts."
-  while IFS=: read -r user home; do
-    for f in "${PLASMA_FILES[@]}"; do
-      dest="hosts/$NAME/plasma/$user/$f"
-      mkdir -p "${dest%/*}"
-      if as_root_target "cat $(printf %q "$home/.config/$f")" > "$dest.tmp" 2>/dev/null; then
-        mv "$dest.tmp" "$dest"
-        note_if_changed "$dest"
-      else
-        rm -f "$dest.tmp"
-      fi
-    done
-    rmdir "hosts/$NAME/plasma/$user" 2>/dev/null || true
-  done <<<"$users"
-fi
-
-# Activating needs root on the target: ask for the sudo password now and check it,
-# before spending time on the build.
+# Needs root on the target to activate, and to read the Plasma panel layouts below:
+# ask for the sudo password now and check it, before spending time on the build.
 as_root=()
 password=""
-if [[ "$ACTION" != build && "$(on_target id -u)" != 0 ]]; then
+if [[ ("$ACTION" != build || -d "hosts/$NAME/plasma") && "$(on_target id -u)" != 0 ]]; then
   as_root=(sudo --stdin --prompt=)
   for attempt in 1 2 3; do
     read -rsp "[sudo] password for $TARGET: " password
@@ -147,6 +119,36 @@ if [[ "$ACTION" != build && "$(on_target id -u)" != 0 ]]; then
       error "checking the sudo password on $TARGET failed: $out"
     fi
   done
+fi
+
+# Runs a command as root on the target (through sudo, unless we're root there).
+as_root_target() {
+  on_target "$(printf '%q ' "${as_root[@]}" "$@")" <<<"$password"
+}
+
+# Each user's Plasma panel layout (see modules/desktop/plasma-panels.nix): the
+# machine's copy wins, so changes made there end up here. Read as root, since homes
+# aren't readable by others. A user without the files there (never logged in) keeps
+# what's here.
+# Only for hosts with a plasma/ directory (and desktop.plasmaPanels set).
+PLASMA_FILES=(plasma-org.kde.plasma.desktop-appletsrc plasmashellrc)
+if [[ -d "hosts/$NAME/plasma" ]]; then
+  # Normal users: NixOS gives them uids from 1000.
+  users="$(on_target "awk -F: '\$3 >= 1000 && \$3 < 30000 { print \$1 \":\" \$6 }' /etc/passwd")" ||
+    error "could not read the users on $TARGET."
+  while IFS=: read -r user home; do
+    for f in "${PLASMA_FILES[@]}"; do
+      dest="hosts/$NAME/plasma/$user/$f"
+      mkdir -p "${dest%/*}"
+      if as_root_target cat "$home/.config/$f" > "$dest.tmp" 2>/dev/null; then
+        mv "$dest.tmp" "$dest"
+        note_if_changed "$dest"
+      else
+        rm -f "$dest.tmp"
+      fi
+    done
+    rmdir "hosts/$NAME/plasma/$user" 2>/dev/null || true
+  done <<<"$users"
 fi
 
 # `path:` makes Nix see new files that aren't in git's index yet (a git flake only sees
@@ -214,8 +216,7 @@ activate='
 '
 echo "Activating ($ACTION) on $TARGET..." >&2
 status=0
-on_target "$(printf '%q ' "${as_root[@]}" sh -c "$activate" sh "$ACTION" "$system")" \
-  <<<"$password" || status=$?
+as_root_target sh -c "$activate" sh "$ACTION" "$system" || status=$?
 
 case "$ACTION:$status" in
   *:0)

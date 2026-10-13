@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-
+# arturas: the admin account (wheel), with a profile photo.
 {
   imports = [ ./avatars.nix ];
 
@@ -12,8 +11,6 @@
     extraGroups = [
       "networkmanager"
       "wheel"
-    ];
-    packages = with pkgs; [
     ];
   };
 }

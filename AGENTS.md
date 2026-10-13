@@ -25,8 +25,9 @@ not covered here. This file records what an agent would otherwise have to rederi
   take `{ pkgs, ... }:` only when needed.
   - `nix.nix` (flakes, `allowUnfree`, weekly GC of generations older than 30 days),
     `locale.nix` (Europe/Vilnius, en_US + lt_LT formats, `us` + `lt` keyboard layouts, Win+Space switches; set both for localed/SDDM and as Plasma's default `/etc/xdg/kxkbrc`, since KWin ignores localed),
-    `networking.nix` (NetworkManager, sshd, port 22, arturas's ssh key, which can log
-    into every user incl. root), `packages.nix` (system packages),
+    `networking.nix` (NetworkManager, sshd on port 22, arturas's ssh key, which can log
+    into every user; ssh logins as root are off, so root goes through sudo),
+    `packages.nix` (system packages), `zram.nix` (compressed swap in RAM; no disk swap),
     `claude-code.nix` (a `claude` wrapper that, on a user's first run, installs the
     official native Claude Code into their `~/.local` via `claude.ai/install.sh`; that
     copy auto-updates itself and, with `localBinInPath`, shadows the wrapper; needs
@@ -66,7 +67,7 @@ not covered here. This file records what an agent would otherwise have to rederi
 
 Hosts: `tv-box` (reached as `arturas@tv-box.lan`; Intel, systemd-boot/EFI). Its
 `hardware/hdd.nix`: the 2 TB USB HDD, ext4 by UUID, mounted `nofail` at `/mnt/hdd`; a
-boot service moves every normal user's `~/{Downloads,Music,Pictures,Videos}` to
+boot service (rerun whenever the HDD gets mounted) moves every normal user's `~/{Downloads,Music,Pictures,Videos}` to
 `/mnt/hdd/home/<user>/` and symlinks them back; a udev rule remounts it when it's plugged
 back in, and `entertainment` gets a KDE dialog (`hdd-missing-warning` user service)
 while it's not mounted. `hdd-missing-notes` writes a read-only "USB HARD DRIVE IS NOT

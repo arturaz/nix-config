@@ -11,6 +11,7 @@
 
 let
   mountPoint = "/mnt/hdd";
+  mountUnit = "${utils.escapeSystemdPath mountPoint}.mount";
   # By UUID (`lsblk -o NAME,UUID`), so another disk can't be mounted here by mistake.
   # Changes if the disk is reformatted.
   uuid = "09f4888d-2069-4ff9-916a-bd96775ba202";
@@ -64,7 +65,7 @@ in
   # systemd unmounts it when it's unplugged; this mounts it again when it's plugged back
   # in (otherwise that only happens on boot).
   services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_UUID}=="${uuid}", ENV{SYSTEMD_WANTS}+="${utils.escapeSystemdPath mountPoint}.mount"
+    ACTION=="add", SUBSYSTEM=="block", ENV{ID_FS_UUID}=="${uuid}", ENV{SYSTEMD_WANTS}+="${mountUnit}"
   '';
 
   # Spin down after 20 minutes without reads or writes; the next access spins it back up
@@ -73,9 +74,9 @@ in
   # replug it finds the disk again even under a new /dev/sdX name.
   systemd.services.hdd-idle = {
     description = "Spin down the HDD at ${mountPoint} when idle";
-    wantedBy = [ "${utils.escapeSystemdPath mountPoint}.mount" ];
-    bindsTo = [ "${utils.escapeSystemdPath mountPoint}.mount" ];
-    after = [ "${utils.escapeSystemdPath mountPoint}.mount" ];
+    wantedBy = [ mountUnit ];
+    bindsTo = [ mountUnit ];
+    after = [ mountUnit ];
     # `-i 0` leaves other disks alone; `-c ata` sends ATA STANDBY, which this enclosure's
     # bridge (JMicron JMS578) passes through.
     serviceConfig.ExecStart = "${lib.getExe pkgs.hd-idle} -i 0 -c ata -a ${disk} -i 1200";
@@ -150,13 +151,16 @@ in
     '';
   };
 
-  # Runs on every boot, before anyone can log in. Existing folders are moved onto the HDD
-  # (never overwriting anything already there) and replaced with the symlink; a folder
-  # that can't be fully moved is left alone with a warning in the journal. If the HDD
-  # isn't mounted, this doesn't run and the links point nowhere until it is.
+  # Runs on every boot, before anyone can log in, and again whenever the HDD is mounted
+  # (e.g. plugged back in after booting without it). Existing folders are moved onto the
+  # HDD (never overwriting anything already there) and replaced with the symlink; a
+  # folder that can't be fully moved is left alone with a warning in the journal.
   systemd.services.hdd-home-links = {
     description = "Link large home folders to ${mountPoint}";
-    wantedBy = [ "multi-user.target" ];
+    wantedBy = [
+      "multi-user.target"
+      mountUnit
+    ];
     before = [ "systemd-user-sessions.service" ];
     unitConfig.RequiresMountsFor = mountPoint;
     serviceConfig = {

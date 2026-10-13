@@ -8,7 +8,7 @@
 }:
 
 let
-  home = config.users.users."entertainment".home;
+  inherit (config.users.users."entertainment") home group;
 
   # One Spotify instance per person, each logged into their own account. `hue` tints
   # the app menu icon (ImageMagick -modulate: 100 keeps Spotify green, 200 is +180°).
@@ -139,7 +139,7 @@ in
 
   # The launchers, as ~/bin/spotify-<name> (symlinks, recreated on every boot/deploy).
   systemd.tmpfiles.rules = [
-    "d ${home}/bin 0755 entertainment users -"
+    "d ${home}/bin 0755 entertainment ${group} -"
   ]
   ++ lib.mapAttrsToList (
     name: package: "L+ ${home}/bin/spotify-${name} - - - - ${lib.getExe package}"
