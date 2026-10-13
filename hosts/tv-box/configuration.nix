@@ -11,6 +11,7 @@
     ../../modules/desktop/plasma.nix
     ../../modules/desktop/audio.nix
     ../../modules/desktop/printing.nix
+    ../../modules/hardware/intel-graphics.nix
   ];
 
   networking.hostName = "tv-box";

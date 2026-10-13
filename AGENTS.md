@@ -18,9 +18,11 @@ not covered here. This file records what an agent would otherwise have to rederi
   - `nix.nix` (flakes, `allowUnfree`), `locale.nix` (Europe/Vilnius, en_US + lt_LT
     formats, `us` keyboard), `networking.nix` (NetworkManager, sshd, port 22),
     `packages.nix` (system packages), `users/arturas.nix` (admin user, wheel, ssh key),
-    `users/entertainment.nix` (non-admin, empty password; tv-box auto-logs into it)
-  - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox), `audio.nix`
+    `users/entertainment.nix` (non-admin, empty password, KTorrent + its firewall ports;
+    tv-box auto-logs into it)
+  - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox with DRM on), `audio.nix`
     (PipeWire), `printing.nix` (CUPS)
+  - `hardware/`: `intel-graphics.nix` (VA-API video decoding via intel-media-driver)
 - `deploy.sh`: remote deploy via `nixos-rebuild --target-host`. Usage and env vars
   (`TARGET`, `UPDATE`, `BUILD_LOCAL`) are documented at its top and in the README.
 - `.vscode/settings.json`: nixd + nixfmt. Its `options.nixos` expression hardcodes the
