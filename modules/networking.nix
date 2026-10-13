@@ -13,7 +13,7 @@
     # A real file rather than a symlink into the store, as sshd's StrictModes expects.
     mode = "0444";
     text = ''
-      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIm/5r39Ldi7+51YW4tBME+mOztxnlN1d+/jauhxP20W Arturas Šlajus
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIm/5r39Ldi7+51YW4tBME+mOztxnlN1d+/jauhxP20W Artūras Šlajus
     '';
   };
 }

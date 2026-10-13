@@ -52,6 +52,14 @@ Apart from those, `/etc/nixos` on the machines isn't used; don't keep a
 `configuration.nix` there, or a plain `nixos-rebuild` on the machine would roll it back
 to that.
 
+## HDD storage
+
+`modules/hardware/hdd.nix` mounts an ext4 disk at `/mnt/hdd` (skipped if it's
+unplugged) and, on every boot, moves each user's Downloads, Music, Pictures and Videos
+onto it, leaving symlinks in their place. To set up a new disk (this wipes it): `sudo
+mkfs.ext4 -L hdd /dev/sdX1`, put its UUID (`lsblk -o NAME,UUID`) into the host's
+`fileSystems."/mnt/hdd".device`, deploy, then reboot.
+
 ## Editor
 
 `.vscode/settings.json` sets up the Nix IDE extension (`jnoortheen.nix-ide`) with `nixd`
