@@ -13,10 +13,12 @@
     # Widevine plugin on first use.
     policies.EncryptedMediaExtensions.Enabled = true;
     # Firefox blocks videos with sound from starting on their own, which stops LRT
-    # (EPIKA) from playing the next episode.
+    # (EPIKA) from playing the next episode. Wildcards (*.lrt.lt) aren't supported, so
+    # each subdomain is listed.
     policies.Permissions.Autoplay.Allow = [
-      "https://www.lrt.lt"
       "https://lrt.lt"
+      "https://www.lrt.lt"
+      "https://epika.lrt.lt"
     ];
   };
 }
