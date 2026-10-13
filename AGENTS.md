@@ -18,10 +18,11 @@ not covered here. This file records what an agent would otherwise have to rederi
   saying what it covers. New settings go into a module (a new file for a new topic), not
   into a host file, unless they are truly machine-specific. Modules are plain attrsets;
   take `{ pkgs, ... }:` only when needed.
-  - `nix.nix` (flakes, `allowUnfree`), `locale.nix` (Europe/Vilnius, en_US + lt_LT
-    formats, `us` keyboard), `networking.nix` (NetworkManager, sshd, port 22,
-    arturas's ssh key, which can log into every user incl. root), `packages.nix`
-    (system packages), `users/arturas.nix` (admin user, wheel),
+  - `nix.nix` (flakes, `allowUnfree`, weekly GC of generations older than 30 days),
+    `locale.nix` (Europe/Vilnius, en_US + lt_LT formats, `us` keyboard),
+    `networking.nix` (NetworkManager, sshd, port 22, arturas's ssh key, which can log
+    into every user incl. root), `packages.nix` (system packages), `users/arturas.nix`
+    (admin user, wheel),
     `users/entertainment/` (`default.nix`: non-admin account, empty password, tv-box
     auto-logs into it; `ktorrent.nix`: KTorrent + its firewall ports; `moonlight.nix`:
     Moonlight game streaming client, streaming from `razor` (Sunshine, not managed by

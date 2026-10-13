@@ -41,6 +41,10 @@ doesn't add them there).
 `flake.lock` pins nixpkgs (`nixos-26.05`). `UPDATE=1 ./deploy.sh <name>` updates it
 before deploying; commit the lock afterwards.
 
+A weekly garbage collection (`modules/nix.nix`) deletes system generations older than
+30 days, so you can only roll back (boot menu or `nixos-rebuild switch --rollback`) to
+deploys from the last 30 days. The current generation is never deleted.
+
 ## Machine-generated files
 
 Machine-generated files (`hardware-configuration.nix`, listed in `MACHINE_FILES` in
