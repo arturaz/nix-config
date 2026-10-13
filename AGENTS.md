@@ -19,10 +19,11 @@ not covered here. This file records what an agent would otherwise have to rederi
     formats, `us` keyboard), `networking.nix` (NetworkManager, sshd, port 22,
     arturas's ssh key, which can log into every user incl. root), `packages.nix`
     (system packages), `users/arturas.nix` (admin user, wheel),
-    `users/entertainment.nix` (non-admin, empty password, KTorrent + its firewall ports,
+    `users/entertainment/` (`default.nix`: non-admin account, empty password, tv-box
+    auto-logs into it; `ktorrent.nix`: KTorrent + its firewall ports; `spotify.nix`:
     one auto-started Spotify web player per person, each a Firefox profile with its own
     Wayland app id, via systemd user services, `~/bin/spotify-<name>` and app menu
-    entries with hue-shifted icons; tv-box auto-logs into it). The native Spotify client
+    entries with hue-shifted icons from `spotify.png`). The native Spotify client
     was tried and dropped: copies in one D-Bus session quit, and its Wayland app id is
     fixed to `spotify`.
   - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox with DRM on and

@@ -7,7 +7,7 @@
     ../../modules/networking.nix
     ../../modules/packages.nix
     ../../modules/users/arturas.nix
-    ../../modules/users/entertainment.nix
+    ../../modules/users/entertainment
     ../../modules/desktop/plasma.nix
     ../../modules/desktop/audio.nix
     ../../modules/desktop/printing.nix

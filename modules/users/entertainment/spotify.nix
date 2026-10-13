@@ -1,5 +1,5 @@
-# A shared, non-admin account for media/TV use, meant to be logged in automatically.
-# Netflix and YouTube run in Firefox; VLC is installed system-wide.
+# One auto-started Spotify web player per person for the entertainment account, with
+# ~/bin/spotify-<name> launchers and app menu entries.
 {
   config,
   lib,
@@ -93,20 +93,7 @@ let
   spotifyPackages = lib.mapAttrs spotifyProfile spotifyProfiles;
 in
 {
-  users.users."entertainment" = {
-    isNormalUser = true;
-    description = "Entertainment";
-    extraGroups = [ "networkmanager" ];
-    # Empty password: the screen locker and login screen unlock with just Enter.
-    # sshd still refuses empty passwords (PermitEmptyPasswords defaults to no).
-    hashedPassword = "";
-    packages =
-      with pkgs;
-      [
-        kdePackages.ktorrent
-      ]
-      ++ lib.attrValues spotifyPackages;
-  };
+  users.users."entertainment".packages = lib.attrValues spotifyPackages;
 
   # The launchers, as ~/bin/spotify-<name> (symlinks, recreated on every boot/deploy).
   systemd.tmpfiles.rules = [
@@ -131,9 +118,4 @@ in
       serviceConfig.Restart = "on-failure";
     }
   ) spotifyPackages;
-
-  # KTorrent's default listening ports, so peers can connect in: 6881 for peers,
-  # 7881 for DHT. Update these if they're changed in KTorrent's settings.
-  networking.firewall.allowedTCPPorts = [ 6881 ];
-  networking.firewall.allowedUDPPorts = [ 7881 ];
 }
