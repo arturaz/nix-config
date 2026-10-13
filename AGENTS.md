@@ -17,7 +17,8 @@ not covered here. This file records what an agent would otherwise have to rederi
   take `{ pkgs, ... }:` only when needed.
   - `nix.nix` (flakes, `allowUnfree`), `locale.nix` (Europe/Vilnius, en_US + lt_LT
     formats, `us` keyboard), `networking.nix` (NetworkManager, sshd, port 22),
-    `packages.nix` (system packages), `users/arturas.nix` (the only user, wheel, ssh key)
+    `packages.nix` (system packages), `users/arturas.nix` (admin user, wheel, ssh key),
+    `users/entertainment.nix` (non-admin, empty password; tv-box auto-logs into it)
   - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox), `audio.nix`
     (PipeWire), `printing.nix` (CUPS)
 - `deploy.sh`: remote deploy via `nixos-rebuild --target-host`. Usage and env vars

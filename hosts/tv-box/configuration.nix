@@ -7,12 +7,18 @@
     ../../modules/networking.nix
     ../../modules/packages.nix
     ../../modules/users/arturas.nix
+    ../../modules/users/entertainment.nix
     ../../modules/desktop/plasma.nix
     ../../modules/desktop/audio.nix
     ../../modules/desktop/printing.nix
   ];
 
   networking.hostName = "tv-box";
+
+  services.displayManager.autoLogin = {
+    enable = true;
+    user = "entertainment";
+  };
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
