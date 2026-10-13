@@ -12,6 +12,7 @@
     ../../modules/users/entertainment
     ../../modules/desktop/plasma.nix
     ../../modules/desktop/plasma-panels.nix
+    ../../modules/desktop/plasma-widgets.nix
     ../../modules/desktop/audio.nix
     ../../modules/desktop/printing.nix
     ../../modules/hardware/intel-graphics.nix

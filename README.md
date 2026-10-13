@@ -75,6 +75,12 @@ never overwrites what's there. To restore a saved layout over a changed one, log
 delete the user's two files on the machine and reboot. For a new host, create
 `hosts/<name>/plasma/` and set `desktop.plasmaPanels = ./plasma;`.
 
+Those files only reference widgets; ones installed with "Get New Widgets" live in
+`~/.local/share/plasma/plasmoids/`, which isn't saved, so a restored layout would show
+"widget not found" in their place. Add such widgets to
+`modules/desktop/plasma-widgets.nix` instead (search nixpkgs for them; the
+`plugin=` lines in the saved `plasma-org.kde.plasma.desktop-appletsrc` show their ids).
+
 ## tv-box's HDD
 
 `hosts/tv-box/hardware/hdd.nix` mounts an ext4 disk at `/mnt/hdd` (skipped if it's

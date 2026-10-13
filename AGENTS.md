@@ -54,7 +54,9 @@ not covered here. This file records what an agent would otherwise have to rederi
   - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox as default browser,
     with DRM on and autoplay allowed on lrt.lt), `plasma-panels.nix` (`desktop.plasmaPanels = ./plasma;`:
     each user's panel files from `hosts/<name>/plasma/<user>/`, copied into homes
-    missing them at boot; `deploy.sh` pulls them from the machine, which wins), `audio.nix` (PipeWire), `printing.nix` (CUPS)
+    missing them at boot; `deploy.sh` pulls them from the machine, which wins), `plasma-widgets.nix`
+    (third-party widgets those layouts use, from nixpkgs; widgets installed in Plasma
+    to `~/.local/share/plasma/plasmoids/` aren't saved), `audio.nix` (PipeWire), `printing.nix` (CUPS)
   - `hardware/`: `intel-graphics.nix` (VA-API video decoding via intel-media-driver)
 - `deploy.sh`: remote deploy, doing `nixos-rebuild --build-host/--target-host --sudo`'s
   steps itself (eval, copy the .drv, build on target, `nix-env --set` +
