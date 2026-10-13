@@ -31,10 +31,13 @@ not covered here. This file records what an agent would otherwise have to rederi
     official native Claude Code into their `~/.local` via `claude.ai/install.sh`; that
     copy auto-updates itself and, with `localBinInPath`, shadows the wrapper; needs
     `nix-ld`. nixpkgs' `claude-code` is avoided because it can't self-update),
+    `users/avatars.nix` (a `users.avatars.<user> = <photo>` option; a boot service
+    sets each via AccountsService's `SetIconFile`, which is where SDDM and KDE read
+    it, overriding photos changed in System Settings),
     `users/arturas.nix`
-    (admin user, wheel),
+    (admin user, wheel; photo `arturas.jpg`, a 512 px crop with EXIF stripped),
     `users/entertainment/` (`default.nix`: non-admin account, empty password, tv-box
-    auto-logs into it; `ktorrent.nix`: KTorrent + its firewall ports; `moonlight.nix`:
+    auto-logs into it, Plasma's stock "Gamepad" avatar; `ktorrent.nix`: KTorrent + its firewall ports; `moonlight.nix`:
     Moonlight game streaming client, streaming from `razor` (Sunshine, not managed by
     this repo); `spotify.nix`: one auto-started Spotify web player per person, each a Firefox profile with its own
     Wayland app id, via systemd user services, `~/bin/spotify-<name>` and app menu
