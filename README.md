@@ -41,8 +41,9 @@ doesn't add them there).
 
 ## Updating
 
-`flake.lock` pins nixpkgs (`nixos-26.05`). `UPDATE=1 ./deploy.sh <name>` updates it
-before deploying; commit the lock afterwards.
+`flake.lock` pins nixpkgs (`nixos-26.05`). `./upgrade.sh <name>` updates it before
+deploying (for now it's just `UPDATE=1 ./deploy.sh <name>`, taking the same arguments);
+commit the lock afterwards.
 
 A weekly garbage collection (`modules/nix.nix`) deletes system generations older than
 30 days, so you can only roll back (boot menu or `nixos-rebuild switch --rollback`) to

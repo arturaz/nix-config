@@ -63,6 +63,8 @@ not covered here. This file records what an agent would otherwise have to rederi
   `switch-to-configuration` via `systemd-run`) so it can check the sudo password before
   building and explain each failure. Usage and env vars (`TARGET`, `UPDATE`,
   `BUILD_LOCAL`) are documented at its top and in the README.
+- `upgrade.sh`: `UPDATE=1 ./deploy.sh "$@"` (updates the flake inputs, then deploys),
+  for now.
 - `.vscode/settings.json`: nixd + nixfmt. Its `options.nixos` expression hardcodes the
   `tv-box` host; update it if that host is ever removed or renamed. Add new
   domain words to `cSpell.words` there when they trip the spell checker.
