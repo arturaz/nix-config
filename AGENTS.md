@@ -61,7 +61,10 @@ back in, and `entertainment` gets a KDE dialog (`hdd-missing-warning` user servi
 while it's not mounted. `hdd-missing-notes` writes a read-only "USB HARD DRIVE IS NOT
 CONNECTED.txt" into the SSD directories underneath the mount point (through a bind mount of
 `/` in a private namespace), so the links show it when the HDD isn't mounted. `hdd-idle` (hd-idle, started with the
-mount) spins it down after 20 minutes without I/O.
+mount) spins it down after 20 minutes without I/O. Its `hardware/usb-speakers.nix`: the USB speakers
+(TI PCM2902, 08bb:2902) only have a 28 dB hardware volume range, so low volumes were
+silent; WirePlumber uses a soft mixer for them and a udev rule keeps the hardware volume
+at 100%.
 
 ## Rules
 

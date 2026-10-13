@@ -14,6 +14,7 @@
     ../../modules/desktop/printing.nix
     ../../modules/hardware/intel-graphics.nix
     ./hardware/hdd.nix
+    ./hardware/usb-speakers.nix
   ];
 
   networking.hostName = "tv-box";
