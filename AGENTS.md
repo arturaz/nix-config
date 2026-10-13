@@ -16,8 +16,9 @@ not covered here. This file records what an agent would otherwise have to rederi
   into a host file, unless they are truly machine-specific. Modules are plain attrsets;
   take `{ pkgs, ... }:` only when needed.
   - `nix.nix` (flakes, `allowUnfree`), `locale.nix` (Europe/Vilnius, en_US + lt_LT
-    formats, `us` keyboard), `networking.nix` (NetworkManager, sshd, port 22),
-    `packages.nix` (system packages), `users/arturas.nix` (admin user, wheel, ssh key),
+    formats, `us` keyboard), `networking.nix` (NetworkManager, sshd, port 22,
+    arturas's ssh key, which can log into every user incl. root), `packages.nix`
+    (system packages), `users/arturas.nix` (admin user, wheel),
     `users/entertainment.nix` (non-admin, empty password, KTorrent + its firewall ports;
     tv-box auto-logs into it)
   - `desktop/`: `plasma.nix` (Plasma 6, Wayland, SDDM, Firefox with DRM on and
