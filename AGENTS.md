@@ -24,7 +24,7 @@ not covered here. This file records what an agent would otherwise have to rederi
   into a host file, unless they are truly machine-specific. Modules are plain attrsets;
   take `{ pkgs, ... }:` only when needed.
   - `nix.nix` (flakes, `allowUnfree`, weekly GC of generations older than 30 days),
-    `locale.nix` (Europe/Vilnius, en_US + lt_LT formats, `us` keyboard),
+    `locale.nix` (Europe/Vilnius, en_US + lt_LT formats, `us` + `lt` keyboard layouts, Win+Space switches; set both for localed/SDDM and as Plasma's default `/etc/xdg/kxkbrc`, since KWin ignores localed),
     `networking.nix` (NetworkManager, sshd, port 22, arturas's ssh key, which can log
     into every user incl. root), `packages.nix` (system packages),
     `claude-code.nix` (a `claude` wrapper that, on a user's first run, installs the
