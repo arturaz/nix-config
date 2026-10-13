@@ -3,6 +3,9 @@
   services.xserver.enable = false;
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
+  # Makes nixpkgs' Chromium-based browsers and Electron apps run natively on Wayland
+  # (newer versions already default to it; Firefox ignores this).
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   programs.firefox = {
     enable = true;
