@@ -38,7 +38,9 @@ not covered here. This file records what an agent would otherwise have to rederi
     `users/arturas.nix`
     (admin user, wheel; photo `arturas.jpg`, a 512 px crop with EXIF stripped),
     `users/entertainment/` (`default.nix`: non-admin account, empty password, tv-box
-    auto-logs into it, Plasma's stock "Gamepad" avatar; `ktorrent.nix`: KTorrent + its firewall ports; `moonlight.nix`:
+    auto-logs into it, Plasma's stock "Gamepad" avatar; `ktorrent.nix`: KTorrent + its firewall ports; `screen.nix`: never dim or turn off the screen
+    when idle (VLC didn't keep it on), written into its `powerdevilrc` by a user service
+    before PowerDevil starts on each login; `moonlight.nix`:
     Moonlight game streaming client, streaming from `razor` (Sunshine, not managed by
     this repo); `spotify.nix`: one auto-started native Spotify per person via systemd user
     services, each with its own HOME (`~/.local/share/spotify-homes/<name>`) and a

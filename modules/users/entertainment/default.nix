@@ -7,6 +7,7 @@
     ../avatars.nix
     ./ktorrent.nix
     ./moonlight.nix
+    ./screen.nix
     ./spotify.nix
   ];
 
