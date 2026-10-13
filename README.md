@@ -58,9 +58,10 @@ to that.
 
 `hosts/tv-box/hardware/hdd.nix` mounts an ext4 disk at `/mnt/hdd` (skipped if it's
 unplugged) and, on every boot, moves each user's Downloads, Music, Pictures and Videos
-onto it, leaving symlinks in their place. To set up a new disk (this wipes it): `sudo
-mkfs.ext4 -L hdd /dev/sdX1`, put its UUID (`lsblk -o NAME,UUID`) into
-that file's `device`, deploy, then reboot.
+onto it, leaving symlinks in their place. It's mounted again when it's plugged back in,
+and the `entertainment` account shows a warning dialog while it's missing. To set up a
+new disk (this wipes it): `sudo mkfs.ext4 -L hdd /dev/sdX1`, put its UUID (`lsblk -o
+NAME,UUID`) into that file's `uuid`, deploy, then reboot.
 
 ## Editor
 
