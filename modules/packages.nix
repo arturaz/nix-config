@@ -7,5 +7,7 @@
     wget
     kdePackages.kate
     vlc
+    # Fallback for sites that only work in Chrome.
+    google-chrome
   ];
 }
