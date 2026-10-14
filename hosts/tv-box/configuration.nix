@@ -13,6 +13,7 @@
     ../../modules/desktop/plasma.nix
     ../../modules/desktop/plasma-panels.nix
     ../../modules/desktop/plasma-widgets.nix
+    ../../modules/desktop/ad-blocker.nix
     ../../modules/desktop/power.nix
     ../../modules/desktop/audio.nix
     ../../modules/desktop/printing.nix
