@@ -9,6 +9,7 @@
     ./moonlight.nix
     ./screen.nix
     ./spotify.nix
+    ./steam.nix
   ];
 
   users.users."entertainment" = {

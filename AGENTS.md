@@ -42,7 +42,8 @@ not covered here. This file records what an agent would otherwise have to rederi
     when idle (VLC didn't keep it on), written into its `powerdevilrc` by a user service
     before PowerDevil starts on each login; `moonlight.nix`:
     Moonlight game streaming client, streaming from `razor` (Sunshine, not managed by
-    this repo); `spotify.nix`: one auto-started native Spotify per person via systemd user
+    this repo); `steam.nix`: Steam (system-wide, as `programs.steam` installs it), to
+    play simple games locally, with Remote Play and LAN game-transfer ports open; `spotify.nix`: one auto-started native Spotify per person via systemd user
     services, each with its own HOME (`~/.local/share/spotify-homes/<name>`) and a
     private D-Bus session from `dbus-run-session`, since copies in one session make
     each other quit (its config can't start services, else e.g. a KDE wallet daemon
