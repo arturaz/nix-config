@@ -20,6 +20,7 @@
     ../../modules/desktop/printing.nix
     ../../modules/hardware/intel-graphics.nix
     ../../modules/backups.nix
+    ../../modules/services/anytype.nix
     ./hardware/hdd.nix
     ./hardware/usb-speakers.nix
   ];
@@ -29,8 +30,21 @@
   # Panel layouts, copied from this machine by deploy.sh.
   desktop.plasmaPanels = ./plasma;
 
-  # Nightly backups of the services, onto the USB HDD, and an encrypted copy of them
-  # on the Hetzner server (see "Backups" in the README).
+  # Anytype's sync server (see "Anytype" in the README): at home straight to this
+  # machine, elsewhere through the router.
+  #
+  # The addresses the apps are told to connect to, tried in this order: at home,
+  # `tv-box.lan` (the router's DNS name for this machine) answers right away; away from
+  # home it doesn't resolve, so they go on to `anytype.arturaz.net` (a DNS record
+  # pointing at the home IP, where the router forwards the ports to tv-box). After
+  # changing these, load the new client-config.yml into the apps again.
+  anytype.externalAddrs = [
+    "tv-box.lan"
+    "anytype.arturaz.net"
+  ];
+
+  # Nightly backups of the services (Anytype's sync server), onto the USB HDD, and an
+  # encrypted copy of them on the Hetzner server (see "Backups" in the README).
   backups.dir = "/mnt/hdd/backups";
   backups.offsite = {
     # User `tv-box-backup` on the Hetzner server (set up by hand, see the README), which

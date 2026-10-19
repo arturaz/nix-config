@@ -84,6 +84,22 @@ not covered here. This file records what an agent would otherwise have to rederi
     Prefer socket-only instances (the default, `port = 0`; access = membership in group
     `redis-<name>`); a TCP one is open to every local user, so it needs a password or a
     firewall rule (anytype.nix: port 6379 + its iptables chain).
+  - `services/anytype.nix`: Anytype's sync server (see the README), `any-sync-bundle
+    start-bundle` as user `any-sync` (state, keys and generated `client-config.yml` in
+    `/var/lib/any-sync`), TCP 33010 + UDP 33020 open; `anytype.externalAddrs` (tv-box:
+    `tv-box.lan`, `anytype.arturaz.net`) is written into its `bundle-config.yml` on every
+    start (the bundle only reads the env var on the first; apps that already joined
+    don't get changed addresses from the server, since its configuration id never
+    changes, so they must load the new client-config.yml). Its own `services.mongodb`
+    (`mongodb-ce`, replica set `rs0`, created by `any-sync-replica-set`: the bundle only
+    does that in its container image, and mongosh, being V8, crashes under the bundle's
+    `MemoryDenyWriteExecute`) and `services.redis.servers.any-sync` (Valkey, from
+    `valkey.nix`) + valkey-bloom (the file node uses only `BF.ADD`/`BF.EXISTS`;
+    nixpkgs' Redis lacks RedisBloom). Bundle validation allows only `redis://` URIs, so
+    no unix socket: iptables `any-sync` chain lets only root/any-sync/the servers' uids
+    reach 27017/6379 and rejects new LAN connections from `any-sync` except DNS and
+    `-o lo`. Nightly backup stops all three (~5 s) and rsyncs their directories;
+    restore chowns them (uids can differ on a new machine).
 - `deploy.sh`: remote deploy, doing `nixos-rebuild --build-host/--target-host --sudo`'s
   steps itself (eval, copy the .drv, build on target, `nix-env --set` +
   `switch-to-configuration` via `systemd-run`) so it can check the sudo password before

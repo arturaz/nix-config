@@ -96,18 +96,55 @@ it): `sudo mkfs.ext4 -L hdd /dev/sdX1`, put its UUID (`lsblk -o NAME,UUID`) into
 file's `uuid` and the disk's `/dev/disk/by-id/ata-...` link into `disk`, deploy, then
 reboot.
 
+## Anytype (sync server)
+
+tv-box runs a self-hosted sync server for [Anytype](https://anytype.io)
+(`modules/services/anytype.nix`): [any-sync-bundle](https://github.com/grishy/any-sync-bundle),
+which is all of Anytype's own server programs in one, built from source
+(`packages/any-sync-bundle/`). Its MongoDB and Valkey (Redis's open-source fork, with the
+bloom filter module from `packages/valkey-bloom/`) are only for it. Apps reach it on TCP
+33010 and UDP 33020, at `tv-box.lan` at home and `anytype.arturaz.net` elsewhere (they
+try both, in that order; `anytype.externalAddrs` in tv-box's configuration; after
+changing those, load the new client-config.yml into the apps again). What it
+stores is end-to-end encrypted by the apps, so tv-box (and its backups) only ever see
+ciphertext. The bundle can't open connections into the LAN, and only it can reach its
+databases (firewall rules on uids), so a break-in through it stays on tv-box.
+
+Outside this repo, it needs:
+
+- **DNS** (Cloudflare, DNS only / grey cloud): an A record for `anytype.arturaz.net` to
+  the home IP.
+- **Router**: forward TCP 33010 and UDP 33020 to tv-box.
+
+Its keys and the network's identity are generated on the first start, in
+`/var/lib/any-sync/bundle-config.yml`; losing them means a new network, so they're in the
+backups. To join it, get the network's settings for the apps:
+`ssh arturas@tv-box.lan sudo cat /var/lib/any-sync/client-config.yml > anytype-tv-box.yml`.
+In the Anytype app (desktop or phone), before logging in, open the settings (gear icon)
+on the start screen, choose the "Self-hosted" network and load that file; then create a
+vault, or log in with an existing key. Notes on Anytype's own network don't move along:
+export them first (Any-Block) and import them after switching.
+
+To update, change `version` and the `hash` in `packages/any-sync-bundle/package.nix`, and
+`vendorHash` to the one in upstream's `flake.nix` for that version. Its version names the
+Anytype release it's compatible with; update it when the apps get ahead. Logs:
+`journalctl -u any-sync -u mongodb -u redis-any-sync`.
+
 ## Backups and restoring
 
 Every night tv-box backs up its services into `/mnt/hdd/backups/` (`backups.dir`):
 
 | When | What | Where |
 |------|------|-------|
-| 03:00 | everything in it, encrypted with restic, to the Hetzner server | `devsrv.arturaz.net` |
+| 01:00 | Anytype's sync server: its keys and file storage, MongoDB, Valkey | `any-sync/` |
+| 03:00 | all of the above, encrypted with restic, to the Hetzner server | `devsrv.arturaz.net` |
 
-The local backups fail while the HDD is missing (`systemctl --failed` shows them). The
-off-site copy keeps 7 daily, 5 weekly and 12 monthly snapshots; its password is in
-`secrets/tv-box.yaml` (sops). The repository is encrypted, so the Hetzner server only
-ever sees ciphertext. `sudo restic-offsite snapshots` lists them.
+Anytype's sync server is stopped for those few seconds (it can only be copied while
+stopped); the apps catch up afterwards. The local backups fail while the HDD is missing
+(`systemctl --failed` shows them). The off-site copy keeps 7 daily, 5 weekly and 12
+monthly snapshots; its password is in `secrets/tv-box.yaml` (sops). The repository is
+encrypted, so the Hetzner server only ever sees ciphertext. `sudo restic-offsite
+snapshots` lists them.
 
 ### Setting up the off-site copy (once)
 
@@ -153,7 +190,8 @@ server is reinstalled.
    From the off-site copy instead:
    `sudo restic-offsite restore latest --target /root/restore`, then
    `sudo backups-restore /root/restore/mnt/hdd/backups`.
-5. Check `systemctl --failed`.
+5. Check `systemctl --failed`. The Anytype apps reconnect by themselves (it's the same
+   network again) and upload whatever changed since the backup.
 
 `backups-restore` stops the services, replaces their data with the backup's and starts
 them again. Each service module adds its part (`backups.restore`; `backups.files` for
