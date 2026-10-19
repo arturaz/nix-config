@@ -123,7 +123,19 @@ Outside this repo, it needs:
 
 - **DNS** (Cloudflare, DNS only / grey cloud): an A record for `anytype.arturaz.net` to
   the home IP.
-- **Router**: forward TCP 33010 and UDP 33020 to tv-box.
+- **Router** (MikroTik, RouterOS 6): forward TCP 33010 and UDP 33020 to tv-box, and
+  hairpin NAT, so devices at home can use `anytype.arturaz.net` too (Android's Private
+  DNS, on by default, bypasses the router's DNS, so phones can't resolve `tv-box.lan`):
+
+  ```
+  /ip firewall nat
+  add chain=dstnat action=dst-nat to-addresses=192.168.88.17 protocol=tcp dst-address-type=local dst-port=33010 comment="tv-box anytype sync TCP"
+  add chain=dstnat action=dst-nat to-addresses=192.168.88.17 protocol=udp dst-address-type=local dst-port=33020 comment="tv-box anytype sync UDP (QUIC)"
+  add chain=srcnat action=masquerade protocol=tcp src-address=192.168.88.0/24 dst-address=192.168.88.17 dst-port=33010 comment="tv-box anytype hairpin TCP"
+  add chain=srcnat action=masquerade protocol=udp src-address=192.168.88.0/24 dst-address=192.168.88.17 dst-port=33020 comment="tv-box anytype hairpin UDP"
+  ```
+
+  `dst-address-type=local` instead of the WAN IP, which can change.
 
 Its keys and the network's identity are generated on the first start, in
 `/var/lib/any-sync/bundle-config.yml`; losing them means a new network, so they're in the
@@ -135,6 +147,12 @@ In the Anytype app (desktop or phone), before logging in, open the settings (gea
 on the start screen, choose the "Self-hosted" network and load that file; then create a
 vault, or log in with an existing key. Notes on Anytype's own network don't move along:
 export them first (Any-Block) and import them after switching.
+
+The apps work offline, so an app that can't reach the server looks fine, and its vault
+just never gets there: logging into that vault elsewhere then fails with `init tech
+space: space is missing`. Clients the server has heard from (the router's address for
+those coming through hairpin NAT):
+`journalctl -u any-sync -o cat | grep -o '\(yamux\|quic\)://[0-9.]*' | sort | uniq -c`.
 
 `./upgrade.sh` updates it to its newest 1.x release (see "Updating"); its version names
 the Anytype release it's compatible with, so run that when the apps have updated. Its
