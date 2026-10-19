@@ -2,7 +2,7 @@
   description = "NixOS configurations";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-  # Secrets (see "Secrets" in README.md). No secrets yet: it's here for the future.
+  # Secrets (see "Secrets" in README.md).
   inputs.sops-nix.url = "github:Mic92/sops-nix";
   inputs.sops-nix.inputs.nixpkgs.follows = "nixpkgs";
 

@@ -1,6 +1,5 @@
 # Who can decrypt the sops files in secrets/ (used by sops-nix; see "Secrets" in
-# README.md). No secrets yet: this is set up for the future. After changing the keys,
-# run `sops updatekeys secrets/*.yaml`.
+# README.md). After changing the keys, run `sops updatekeys secrets/*.yaml`.
 keys:
   # arturas's ~/.ssh/id_ed25519, which sops reads directly (asking for its passphrase).
   - &arturas ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIm/5r39Ldi7+51YW4tBME+mOztxnlN1d+/jauhxP20W

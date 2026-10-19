@@ -10,8 +10,11 @@ not covered here. This file records what an agent would otherwise have to rederi
   (auto-discovered, nothing to register). Each gets `hosts/<name>/configuration.nix` +
   `hosts/<name>/hardware-configuration.nix` + the sops-nix module. Inputs: `nixpkgs` on
   `nixos-26.05`, `sops-nix` (following our nixpkgs).
-- `.sops.yaml` + `secrets/*.yaml` (none yet): sops-nix secrets, decryptable by arturas's
-  SSH key and each host's SSH host key; see "Secrets" in the README. Never put a
+- `.sops.yaml` + `secrets/*.yaml` (`tv-box.yaml`: `restic-password`): sops-nix secrets,
+  decryptable by arturas's SSH key and each host's SSH host key; see "Secrets" in the
+  README. Encrypting needs only the public keys, so a new secret can be generated and
+  piped into `sops --encrypt --filename-override secrets/<f>.yaml /dev/stdin` without
+  ever being shown. Never put a
   plaintext secret in a `.nix` file: the repo will be shared read-only with friends,
   and the Nix store is world-readable.
 - `hosts/<name>/configuration.nix`: imports from `modules/` and `./hardware/`, plus
@@ -64,6 +67,14 @@ not covered here. This file records what an agent would otherwise have to rederi
     writes the policy files, Chrome reads its copy in `/etc/opt/chrome`), `power.nix` (never auto-suspend on AC: a
     system-wide `/etc/xdg/powerdevilrc` default that users' own settings override), `audio.nix` (PipeWire), `printing.nix` (CUPS)
   - `hardware/`: `intel-graphics.nix` (VA-API video decoding via intel-media-driver)
+  - `backups.nix`: `backups.dir` (tv-box: `/mnt/hdd/backups`), where services put
+    nightly backups (units `RequiresMountsFor` it); `backups.files` (directories rsynced
+    to `<dir>/files<path>`; unused now); `backups.restore.{stopUnits,script}` (each
+    module's part of the `backups-restore` command, which gets the backup in `$src`);
+    `backups.offsite.{sftp,passwordFile}` (restic `offsite` over SFTP to
+    `devsrv.arturaz.net`, a.k.a. arturaz-dev: Hetzner, Debian, not managed here; logs in
+    with the host's SSH host key; the server's host key is pinned in `serverHostKey`;
+    password from sops).
 - `deploy.sh`: remote deploy, doing `nixos-rebuild --build-host/--target-host --sudo`'s
   steps itself (eval, copy the .drv, build on target, `nix-env --set` +
   `switch-to-configuration` via `systemd-run`) so it can check the sudo password before

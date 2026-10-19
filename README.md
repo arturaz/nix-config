@@ -95,16 +95,79 @@ it): `sudo mkfs.ext4 -L hdd /dev/sdX1`, put its UUID (`lsblk -o NAME,UUID`) into
 file's `uuid` and the disk's `/dev/disk/by-id/ata-...` link into `disk`, deploy, then
 reboot.
 
+## Backups and restoring
+
+Every night tv-box backs up its services into `/mnt/hdd/backups/` (`backups.dir`):
+
+| When | What | Where |
+|------|------|-------|
+| 03:00 | everything in it, encrypted with restic, to the Hetzner server | `devsrv.arturaz.net` |
+
+The local backups fail while the HDD is missing (`systemctl --failed` shows them). The
+off-site copy keeps 7 daily, 5 weekly and 12 monthly snapshots; its password is in
+`secrets/tv-box.yaml` (sops). The repository is encrypted, so the Hetzner server only
+ever sees ciphertext. `sudo restic-offsite snapshots` lists them.
+
+### Setting up the off-site copy (once)
+
+On the Hetzner server (Debian), as root, create a user that can only use SFTP in its
+own directory:
+
+```sh
+useradd --system --no-create-home --home-dir /srv/tv-box-backup \
+  --shell /usr/sbin/nologin tv-box-backup
+mkdir -p /srv/tv-box-backup/restic /etc/ssh/authorized_keys
+chown tv-box-backup: /srv/tv-box-backup/restic
+cat >> /etc/ssh/sshd_config <<'END'
+
+Match User tv-box-backup
+    ChrootDirectory /srv/tv-box-backup
+    ForceCommand internal-sftp
+    AuthorizedKeysFile /etc/ssh/authorized_keys/tv-box-backup
+    AllowTcpForwarding no
+    X11Forwarding no
+END
+sshd -t && systemctl reload ssh
+```
+
+tv-box logs in with its SSH host key, so put its public half (`cat
+/etc/ssh/ssh_host_ed25519_key.pub` on tv-box) into
+`/etc/ssh/authorized_keys/tv-box-backup` on the server, then run the first backup:
+`ssh arturas@tv-box.lan sudo systemctl start restic-backups-offsite`. Mind the free
+space there (about as much as `/mnt/hdd/backups` takes). The server's own host key is
+pinned in tv-box's configuration (`backups.offsite.serverHostKey`); update it if the
+server is reinstalled.
+
+### Restoring onto a new machine
+
+1. Install NixOS and add the machine as in "Adding a machine". For a replacement tv-box,
+   update its `hardware-configuration.nix`, and the HDD's UUID in
+   `hosts/tv-box/hardware/hdd.nix` if the HDD is new too.
+2. A new install has a new SSH host key: put it in `.sops.yaml` (see "Secrets") and run
+   `nix shell nixpkgs#sops -c sops updatekeys secrets/*.yaml`, so the machine can decrypt
+   the restic password, and replace the old key in the Hetzner server's
+   `/etc/ssh/authorized_keys/tv-box-backup` (needed for the off-site copy).
+3. Deploy. The services start empty, with new keys.
+4. With the HDD's backups: `sudo backups-restore` (it asks before replacing anything).
+   From the off-site copy instead:
+   `sudo restic-offsite restore latest --target /root/restore`, then
+   `sudo backups-restore /root/restore/mnt/hdd/backups`.
+5. Check `systemctl --failed`.
+
+`backups-restore` stops the services, replaces their data with the backup's and starts
+them again. Each service module adds its part (`backups.restore`; `backups.files` for
+plain directories).
+
 ## Secrets
 
-There are no secrets yet; [sops-nix](https://github.com/Mic92/sops-nix) is set up for
-when one is needed. Secrets live encrypted in `secrets/*.yaml` (safe to commit; anyone
-with read access to the repo sees only ciphertext and the key names). `.sops.yaml` lists
+Secrets for [sops-nix](https://github.com/Mic92/sops-nix) live encrypted in
+`secrets/*.yaml` (safe to commit; anyone with read access to the repo sees only
+ciphertext and the key names). `.sops.yaml` lists
 who can decrypt them: your `~/.ssh/id_ed25519` and each machine's SSH host key, so a
 machine decrypts its secrets itself at activation, into `/run/secrets/` (never into the
 world-readable Nix store).
 
-Adding the first one:
+Adding one (`secrets/tv-box.yaml` holds tv-box's restic password):
 
 1. `nix shell nixpkgs#sops -c sops secrets/common.yaml` opens an editor; add
    `wifi-password: hunter2` and save. sops asks for your SSH key's passphrase whenever
