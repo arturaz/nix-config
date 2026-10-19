@@ -307,6 +307,9 @@ plugin=org.kde.plasma.printmanager
 immutability=1
 plugin=org.kde.plasma.volume
 
+[Containments][25][Applets][7][Applets][19][Configuration][General]
+migrated=true
+
 [Containments][25][Applets][7][Applets][22]
 immutability=1
 plugin=org.kde.plasma.battery
@@ -326,6 +329,10 @@ plugin=org.kde.plasma.notifications
 [Containments][25][Applets][7][Applets][9]
 immutability=1
 plugin=org.kde.plasma.manage-inputmethod
+
+[Containments][25][Applets][7][General]
+extraItems=org.kde.plasma.notifications,org.kde.plasma.manage-inputmethod,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.mediacontroller,org.kde.plasma.cameraindicator,org.kde.plasma.keyboardlayout,org.kde.plasma.weather,org.kde.plasma.keyboardindicator,org.kde.plasma.battery,org.kde.plasma.networkmanagement,org.kde.plasma.brightness,org.kde.kscreen,org.kde.plasma.printmanager,org.kde.plasma.volume
+knownItems=org.kde.plasma.notifications,org.kde.plasma.manage-inputmethod,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.mediacontroller,org.kde.plasma.cameraindicator,org.kde.plasma.keyboardlayout,org.kde.plasma.weather,org.kde.plasma.keyboardindicator,org.kde.plasma.battery,org.kde.plasma.networkmanagement,org.kde.plasma.brightness,org.kde.kscreen,org.kde.plasma.printmanager,org.kde.plasma.volume
 
 [Containments][25][General]
 AppletOrder=26;38;30;31;32;27;28;29;39;40;37;7
