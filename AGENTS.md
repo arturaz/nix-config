@@ -19,9 +19,14 @@ not covered here. This file records what an agent would otherwise have to rederi
   plaintext secret in a `.nix` file: the repo will be shared read-only with friends,
   and the Nix store is world-readable.
 - `packages/<name>/package.nix`: packages nixpkgs lacks, `callPackage`d by the module
-  using them, pinned and updated by hand: `any-sync-bundle` (Go, built as upstream's
-  flake.nix does; take `vendorHash` from there), `valkey-bloom` (Rust; upstream has no
-  Cargo.lock, so ours is generated next to it).
+  using them, pinned to release tags by hash: `any-sync-bundle` (Go, built as upstream's
+  flake.nix does), `valkey-bloom` (Rust; upstream has no Cargo.lock, so ours is
+  generated next to it). Also the flake's `packages.x86_64-linux.<name>` (flake.nix's
+  `packages`), which is how nix-update finds them. Each declares its update policy as
+  `passthru.updateScript = nix-update-script { extraArgs = [ ... ]; }` (nixpkgs'
+  convention; `--version-regex` limiting it to stable 1.x tags, `--generate-lockfile`
+  for valkey-bloom); the flake's `apps.x86_64-linux.update-packages` runs every package's
+  updateScript with `--flake <name>`, so a new package only needs its own updateScript.
 - `hosts/<name>/configuration.nix`: imports from `modules/` and `./hardware/`, plus
   only host-specific settings (hostname, boot loader, `system.stateVersion`).
 - `hosts/<name>/hardware/`: hardware only that machine has (e.g. a particular disk),
@@ -109,8 +114,12 @@ not covered here. This file records what an agent would otherwise have to rederi
   `switch-to-configuration` via `systemd-run`) so it can check the sudo password before
   building and explain each failure. Usage and env vars (`TARGET`, `UPDATE`,
   `BUILD_LOCAL`) are documented at its top and in the README.
-- `upgrade.sh`: `UPDATE=1 ./deploy.sh "$@"` (updates the flake inputs, then deploys),
-  for now.
+- `upgrade.sh`: `nix flake update`; `nix run path:.#update-packages` (see
+  `packages/`); `nix flake check` (the VM tests; nothing deployed if one fails); then
+  `./deploy.sh "$@"`. update-packages was tested by downgrading both packages in a
+  scratch copy: it restored the exact versions, hashes and Cargo.lock; with nothing
+  newer it changes nothing. nix-update evaluates the flake as a git flake, so it only
+  sees files git tracks (with jj: those in `@-` or modified, not new files in `@`).
 - `.vscode/settings.json`: nixd + nixfmt. Its `options.nixos` expression hardcodes the
   `tv-box` host; update it if that host is ever removed or renamed. Add new
   domain words to `cSpell.words` there when they trip the spell checker.

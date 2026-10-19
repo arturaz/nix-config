@@ -41,10 +41,19 @@ doesn't add them there).
 
 ## Updating
 
-`flake.lock` pins nixpkgs (`nixos-26.05`). `./upgrade.sh <name>` updates it before
-deploying (for now it's just `UPDATE=1 ./deploy.sh <name>`, taking the same arguments);
-commit the lock afterwards. Packages that aren't in nixpkgs (`packages/`) are pinned in
-their own files and updated by hand (see their comments).
+`flake.lock` pins nixpkgs (`nixos-26.05`), and the packages that aren't in nixpkgs
+(`packages/`) are pinned to a release in their own files. `./upgrade.sh <name>` (same
+arguments as `deploy.sh`) updates all of them, then runs the VM tests (`tests/`: a few
+minutes, in VMs on this computer), and deploys only if they pass. Commit the updated
+files afterwards (it lists them). For nixpkgs alone, without the packages and the tests,
+`UPDATE=1 ./deploy.sh <name>` still works.
+
+The packages are updated with [nix-update](https://github.com/Mic92/nix-update) to their
+newest stable 1.x release (never a development branch or a release candidate). Each
+`package.nix` declares that itself (`passthru.updateScript`), and `nix run
+path:.#update-packages` runs them all (without testing or deploying). A new major
+version (2.0) is left alone, since it may need manual steps: read its release notes,
+then change `1` to `2` in that package's `updateScript` and run `./upgrade.sh`.
 
 A weekly garbage collection (`modules/nix.nix`) deletes system generations older than
 30 days, so you can only roll back (boot menu or `nixos-rebuild switch --rollback`) to
@@ -125,11 +134,10 @@ on the start screen, choose the "Self-hosted" network and load that file; then c
 vault, or log in with an existing key. Notes on Anytype's own network don't move along:
 export them first (Any-Block) and import them after switching.
 
-To update, change `version` and the `hash` in `packages/any-sync-bundle/package.nix`, and
-`vendorHash` to the one in upstream's `flake.nix` for that version. Its version names the
-Anytype release it's compatible with; update it when the apps get ahead. Then run its
-test (a client syncing through it in VMs, then backup and restore):
-`nix build -L --no-link path:.#checks.x86_64-linux.anytype`. Logs:
+`./upgrade.sh` updates it to its newest 1.x release (see "Updating"); its version names
+the Anytype release it's compatible with, so run that when the apps have updated. Its
+test (a client syncing through it in VMs, then backup and restore) runs there before
+deploying; alone: `nix build -L --no-link path:.#checks.x86_64-linux.anytype`. Logs:
 `journalctl -u any-sync -u mongodb -u redis-any-sync`.
 
 ## Backups and restoring

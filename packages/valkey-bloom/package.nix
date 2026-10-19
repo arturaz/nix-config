@@ -1,6 +1,7 @@
 # valkey-bloom, Valkey's bloom filter module (RedisBloom's BF.* commands); not in
 # nixpkgs. Upstream has no Cargo.lock, so ./Cargo.lock is generated (`cargo
-# generate-lockfile` in the source) and must be regenerated when updating.
+# generate-lockfile` in the source). upgrade.sh updates it, and regenerates
+# ./Cargo.lock, to the newest 1.x release (see `passthru.updateScript`).
 #
 # Background: a bloom filter answers "have I seen this key before?" using little memory
 # (it can say "maybe" for a key it hasn't seen, but never "no" for one it has).
@@ -17,6 +18,7 @@
   lib,
   rustPlatform,
   fetchFromGitHub,
+  nix-update-script,
 }:
 
 # nixpkgs' builder for Rust programs; it runs `cargo build --release` and installs the
@@ -50,6 +52,20 @@ rustPlatform.buildRustPackage (finalAttrs: {
   # work, also inside a MULTI transaction as the file node uses them; and the VM test in
   # tests/anytype.nix runs a client against it.)
   doCheck = false;
+
+  # How upgrade.sh updates it (through the flake's update-packages): nix-update looks
+  # up the project's releases, takes the newest whose tag matches the regex, rewrites
+  # `version` and the hash above, and regenerates ./Cargo.lock. Only stable 1.x tags
+  # ("1.0.2"): never a branch or a release candidate ("1.0.0-rc1"), and not a new major
+  # version, which may need manual steps (read its release notes, then change `1` to
+  # `2` here).
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--generate-lockfile"
+      "--version-regex"
+      ''^(1\.[0-9]+\.[0-9]+)$''
+    ];
+  };
 
   meta = {
     description = "Bloom filter module for Valkey";

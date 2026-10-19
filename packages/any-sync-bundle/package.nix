@@ -1,7 +1,7 @@
 # any-sync-bundle (https://github.com/grishy/any-sync-bundle): Anytype's sync network
 # (coordinator, consensus node, file node and sync node) as a single program; not in
-# nixpkgs. Built as upstream's own flake.nix builds it. When updating, take the new
-# `vendorHash` from upstream's flake.nix too.
+# nixpkgs. Built as upstream's own flake.nix builds it. upgrade.sh updates it to the
+# newest 1.x release (see `passthru.updateScript`).
 #
 # Background: Anytype's own servers are four separate programs from anyproto
 # (any-sync-coordinator, -consensusnode, -filenode, -node), each normally run as its own
@@ -16,6 +16,7 @@
   buildGoModule,
   go_1_27,
   fetchFromGitHub,
+  nix-update-script,
 }:
 
 # buildGoModule is nixpkgs' builder for Go programs. Its default Go is older than the
@@ -36,7 +37,7 @@
 
   # Builds run without network access, so nixpkgs first downloads all Go dependencies
   # (from go.mod/go.sum) in a separate step; this pins the hash of that download.
-  # Upstream's flake.nix has the same value, which is where to get it when updating.
+  # nix-update recomputes it when updating (upstream's flake.nix has the same value).
   vendorHash = "sha256-lWmHEtDUYYjcMAJmfHhw6Yq7Ie0lBtANaT6eJNJP5hw=";
 
   # A static binary without C code, as upstream builds its releases.
@@ -51,6 +52,18 @@
 
   # The build also runs upstream's tests (`go test`), except these. They need Docker.
   excludedPackages = [ "integration" ];
+
+  # How upgrade.sh updates it (through the flake's update-packages): nix-update looks
+  # up the project's releases, takes the newest whose tag matches the regex, and
+  # rewrites `version` and both hashes above. Only stable 1.x tags ("v1.8.0-2026-11-02"):
+  # never a branch, and not a new major version, which may need manual steps (read its
+  # release notes, then change `1` to `2` here).
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--version-regex"
+      ''^v(1\.[0-9]+\.[0-9]+-[0-9]{4}-[0-9]{2}-[0-9]{2})$''
+    ];
+  };
 
   meta = {
     description = "Self-hosted Anytype sync server in a single program";
