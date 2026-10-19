@@ -79,6 +79,11 @@ not covered here. This file records what an agent would otherwise have to rederi
     `devsrv.arturaz.net`, a.k.a. arturaz-dev: Hetzner, Debian, not managed here; logs in
     with the host's SSH host key; the server's host key is pinned in `serverHostKey`;
     password from sops).
+  - `services/valkey.nix`: `services.redis.package = valkey` for all instances; each
+    service gets its own `services.redis.servers.<name>` instead of sharing one.
+    Prefer socket-only instances (the default, `port = 0`; access = membership in group
+    `redis-<name>`); a TCP one is open to every local user, so it needs a password or a
+    firewall rule (anytype.nix: port 6379 + its iptables chain).
 - `deploy.sh`: remote deploy, doing `nixos-rebuild --build-host/--target-host --sudo`'s
   steps itself (eval, copy the .drv, build on target, `nix-env --set` +
   `switch-to-configuration` via `systemd-run`) so it can check the sudo password before
