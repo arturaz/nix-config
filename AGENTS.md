@@ -17,6 +17,10 @@ not covered here. This file records what an agent would otherwise have to rederi
   ever being shown. Never put a
   plaintext secret in a `.nix` file: the repo will be shared read-only with friends,
   and the Nix store is world-readable.
+- `packages/<name>/package.nix`: packages nixpkgs lacks, `callPackage`d by the module
+  using them, pinned and updated by hand: `any-sync-bundle` (Go, built as upstream's
+  flake.nix does; take `vendorHash` from there), `valkey-bloom` (Rust; upstream has no
+  Cargo.lock, so ours is generated next to it).
 - `hosts/<name>/configuration.nix`: imports from `modules/` and `./hardware/`, plus
   only host-specific settings (hostname, boot loader, `system.stateVersion`).
 - `hosts/<name>/hardware/`: hardware only that machine has (e.g. a particular disk),
