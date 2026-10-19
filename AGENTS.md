@@ -114,6 +114,10 @@ not covered here. This file records what an agent would otherwise have to rederi
   `switch-to-configuration` via `systemd-run`) so it can check the sudo password before
   building and explain each failure. Usage and env vars (`TARGET`, `UPDATE`,
   `BUILD_LOCAL`) are documented at its top and in the README.
+- `anytype-client-config.sh [name] [output]`: copies a host's
+  `/var/lib/any-sync/client-config.yml` (root-only) to `anytype-<name>.yml` (ignored by
+  `.gitignore`), with deploy.sh's sudo password handling (`ssh host sudo cat` can't ask
+  for it without a terminal).
 - `upgrade.sh`: `nix flake update`; `nix run path:.#update-packages` (see
   `packages/`); `nix flake check` (the VM tests; nothing deployed if one fails); then
   `./deploy.sh "$@"`. update-packages was tested by downgrading both packages in a

@@ -128,7 +128,9 @@ Outside this repo, it needs:
 Its keys and the network's identity are generated on the first start, in
 `/var/lib/any-sync/bundle-config.yml`; losing them means a new network, so they're in the
 backups. To join it, get the network's settings for the apps:
-`ssh arturas@tv-box.lan sudo cat /var/lib/any-sync/client-config.yml > anytype-tv-box.yml`.
+`./anytype-client-config.sh` (asks for tv-box's sudo password, since the file is
+root-only, and saves it as `anytype-tv-box.yml`; `./anytype-client-config.sh <name>
+<file>` for another host or file name, `-` for the file to print it).
 In the Anytype app (desktop or phone), before logging in, open the settings (gear icon)
 on the start screen, choose the "Self-hosted" network and load that file; then create a
 vault, or log in with an existing key. Notes on Anytype's own network don't move along:
