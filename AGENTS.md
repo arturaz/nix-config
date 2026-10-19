@@ -9,7 +9,8 @@ not covered here. This file records what an agent would otherwise have to rederi
 - `flake.nix`: `nixosConfigurations.<name>` for every directory in `hosts/`
   (auto-discovered, nothing to register). Each gets `hosts/<name>/configuration.nix` +
   `hosts/<name>/hardware-configuration.nix` + the sops-nix module. Inputs: `nixpkgs` on
-  `nixos-26.05`, `sops-nix` (following our nixpkgs).
+  `nixos-26.05`, `sops-nix` (following our nixpkgs). `checks.x86_64-linux.<name>`: the
+  NixOS VM tests in `tests/` (`anytype`).
 - `.sops.yaml` + `secrets/*.yaml` (`tv-box.yaml`: `restic-password`): sops-nix secrets,
   decryptable by arturas's SSH key and each host's SSH host key; see "Secrets" in the
   README. Encrypting needs only the public keys, so a new secret can be generated and
@@ -99,7 +100,10 @@ not covered here. This file records what an agent would otherwise have to rederi
     no unix socket: iptables `any-sync` chain lets only root/any-sync/the servers' uids
     reach 27017/6379 and rejects new LAN connections from `any-sync` except DNS and
     `-o lo`. Nightly backup stops all three (~5 s) and rsyncs their directories;
-    restore chowns them (uids can differ on a new machine).
+    restore chowns them (uids can differ on a new machine). `tests/anytype.nix` (client:
+    nixpkgs' `anytype-cli` with `--network-config`, through its REST API on 31012)
+    covers sync, firewall, backup, restore, the address rewrite; ~1 min, run it after
+    changing either.
 - `deploy.sh`: remote deploy, doing `nixos-rebuild --build-host/--target-host --sudo`'s
   steps itself (eval, copy the .drv, build on target, `nix-env --set` +
   `switch-to-configuration` via `systemd-run`) so it can check the sudo password before
@@ -150,6 +154,8 @@ at 100%.
   work.
 
 ## Checking changes without deploying
+
+VM tests (`tests/`): `nix build -L --no-link path:.#checks.x86_64-linux.anytype`.
 
 Evaluate a host (~5 s, catches option/type errors):
 

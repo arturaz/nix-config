@@ -28,5 +28,20 @@
     in
     {
       nixosConfigurations = nixpkgs.lib.genAttrs hostNames mkHost;
+
+      # VM tests of modules (tests/); `nix build -L --no-link path:.#checks.x86_64-linux.<name>`.
+      # They boot throwaway VMs on this machine; nothing is deployed. Their nixpkgs is the
+      # hosts' one (same flake input), with unfree packages allowed like on the hosts
+      # (modules/nix.nix), since the Anytype test needs MongoDB.
+      checks.x86_64-linux =
+        let
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+        in
+        {
+          anytype = import ./tests/anytype.nix { inherit pkgs; };
+        };
     };
 }

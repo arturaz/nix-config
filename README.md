@@ -127,7 +127,9 @@ export them first (Any-Block) and import them after switching.
 
 To update, change `version` and the `hash` in `packages/any-sync-bundle/package.nix`, and
 `vendorHash` to the one in upstream's `flake.nix` for that version. Its version names the
-Anytype release it's compatible with; update it when the apps get ahead. Logs:
+Anytype release it's compatible with; update it when the apps get ahead. Then run its
+test (a client syncing through it in VMs, then backup and restore):
+`nix build -L --no-link path:.#checks.x86_64-linux.anytype`. Logs:
 `journalctl -u any-sync -u mongodb -u redis-any-sync`.
 
 ## Backups and restoring
